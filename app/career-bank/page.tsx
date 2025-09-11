@@ -321,7 +321,83 @@ export default function CareerBankPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}>
+        <style jsx global>{`
+          :root{
+            --cozy-bg: #F4DBD8;               /* Background */
+            --cozy-text: #2A0800;             /* Primary Text */
+            --cozy-muted: #775144;            /* Secondary Text */
+            --cozy-btn-primary: #C09891;      /* Primary Button */
+            --cozy-btn-primary-hover: #775144;/* Primary Button Hover */
+            --cozy-btn-primary-text-dark: #2A0800;
+            --cozy-btn-primary-text-light: #ffffff;
+            --cozy-btn-secondary: #BEA8A7;    /* Secondary Button */
+            --cozy-btn-secondary-hover: #C09891;
+            --cozy-navbar: #2A0800;           /* Navbar */
+            --cozy-footer: #2A0800;
+            --cozy-card-bg: #BEA8A7;
+            --cozy-card-text: #2A0800;
+            --cozy-heading: #C09891;
+            --cozy-heading-alt: #D98E82;
+          }
+
+          body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
+
+          /* map common utility classes used by shadcn/ui / Tailwind in this page */
+          .text-muted-foreground { color: var(--cozy-muted) !important; }
+          .text-primary { color: var(--cozy-heading) !important; }
+          .text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
+
+          .bg-primary { background-color: var(--cozy-btn-primary) !important; }
+          .bg-muted { background-color: var(--cozy-card-bg) !important; }
+
+          /* group-hover overrides */
+          .group:hover .group-hover\\:text-primary { color: var(--cozy-heading) !important; }
+          .group:hover .group-hover\\:bg-primary { background-color: var(--cozy-btn-primary) !important; }
+          .group:hover .group-hover\\:text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
+
+          /* viewed state that used bg-muted/20 in Tailwind */
+          [class*="bg-muted"] { background-color: var(--cozy-card-bg) !important; }
+
+          /* Card styling */
+          .card-cozy {
+            background: var(--cozy-card-bg) !important;
+            color: var(--cozy-card-text) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 6px 18px rgba(42,8,0,0.06) !important;
+          }
+
+          /* Buttons (best-effort override) */
+          .btn-cozy-primary {
+            background: var(--cozy-btn-primary) !important;
+            color: var(--cozy-btn-primary-text-light) !important;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+            box-shadow: 0 6px 14px rgba(33,10,8,0.10);
+          }
+          .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-light) !important; }
+
+          .btn-cozy-secondary {
+            background: var(--cozy-btn-secondary) !important;
+            color: var(--cozy-btn-primary-text-dark) !important;
+            font-weight: 600;
+            border-radius: 10px;
+          }
+          .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
+
+          /* Headings */
+          .cozy-heading { color: var(--cozy-heading) !important; }
+
+          /* Links */
+          a { color: var(--cozy-heading) !important; }
+          a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
+
+          /* Badge tweaks */
+          .badge { border-radius: 8px !important; }
+
+        `}</style>
+
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -333,21 +409,103 @@ export default function CareerBankPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div
+      className="container mx-auto px-4 py-8"
+      style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}
+    >
+      {/* Global CSS variables + overrides */}
+      <style jsx global>{`
+        :root{
+          --cozy-bg: #F4DBD8;               /* Background */
+          --cozy-text: #2A0800;             /* Primary Text */
+          --cozy-muted: #775144;            /* Secondary Text */
+          --cozy-btn-primary: #C09891;      /* Primary Button */
+          --cozy-btn-primary-hover: #775144;/* Primary Button Hover */
+          --cozy-btn-primary-text-dark: #2A0800;
+          --cozy-btn-primary-text-light: #ffffff;
+          --cozy-btn-secondary: #BEA8A7;    /* Secondary Button */
+          --cozy-btn-secondary-hover: #C09891;
+          --cozy-navbar: #2A0800;           /* Navbar */
+          --cozy-footer: #2A0800;
+          --cozy-card-bg: #BEA8A7;
+          --cozy-card-text: #2A0800;
+          --cozy-heading: #C09891;
+          --cozy-heading-alt: #D98E82;
+        }
+
+        body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
+
+        /* map common utility classes used by shadcn/ui / Tailwind in this page */
+        .text-muted-foreground { color: var(--cozy-muted) !important; }
+        .text-primary { color: var(--cozy-heading) !important; }
+        .text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
+
+        .bg-primary { background-color: var(--cozy-btn-primary) !important; }
+        .bg-muted { background-color: var(--cozy-card-bg) !important; }
+
+        /* group-hover overrides */
+        .group:hover .group-hover\\:text-primary { color: var(--cozy-heading) !important; }
+        .group:hover .group-hover\\:bg-primary { background-color: var(--cozy-btn-primary) !important; }
+        .group:hover .group-hover\\:text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
+
+        /* viewed state that used bg-muted/20 in Tailwind */
+        [class*="bg-muted"] { background-color: var(--cozy-card-bg) !important; }
+
+        /* Card styling */
+        .card-cozy {
+          background: var(--cozy-card-bg) !important;
+          color: var(--cozy-card-text) !important;
+          border-radius: 12px !important;
+          box-shadow: 0 6px 18px rgba(42,8,0,0.06) !important;
+        }
+
+        /* Buttons (best-effort override) */
+        .btn-cozy-primary {
+          background: var(--cozy-btn-primary) !important;
+          color: var(--cozy-btn-primary-text-light) !important;
+          font-weight: 600;
+          border-radius: 10px;
+          transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+          box-shadow: 0 6px 14px rgba(33,10,8,0.10);
+        }
+        .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-light) !important; }
+
+        .btn-cozy-secondary {
+          background: var(--cozy-btn-secondary) !important;
+          color: var(--cozy-btn-primary-text-dark) !important;
+          font-weight: 600;
+          border-radius: 10px;
+        }
+        .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
+
+        /* Headings */
+        .cozy-heading { color: var(--cozy-heading) !important; }
+
+        /* Links */
+        a { color: var(--cozy-heading) !important; }
+        a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
+
+        /* Badge tweaks */
+        .badge { border-radius: 8px !important; }
+
+      `}</style>
+
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div>
-            <h1 className="font-heading text-3xl font-bold mb-2">Career Bank</h1>
+            <h1 className="font-heading text-3xl font-bold mb-2 cozy-heading" style={{ color: "var(--cozy-heading)" }}>
+              Career Bank
+            </h1>
             <p className="text-muted-foreground text-lg">
               Explore {careers.length} career opportunities with advanced analytics and insights
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={exportResults}>
+            <Button variant="outline" size="sm" onClick={exportResults} className="btn-cozy-secondary">
               <Download className="h-4 w-4 mr-2" />
               Export Results
             </Button>
-            <Button variant="outline" size="sm" onClick={shareResults}>
+            <Button variant="outline" size="sm" onClick={shareResults} className="btn-cozy-secondary">
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
@@ -357,7 +515,7 @@ export default function CareerBankPage() {
         {/* Analytics Dashboard */}
         {analytics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
+            <Card className="card-cozy">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Eye className="h-4 w-4 text-primary" />
@@ -368,7 +526,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-cozy">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Bookmark className="h-4 w-4 text-primary" />
@@ -379,7 +537,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-cozy">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-primary" />
@@ -390,7 +548,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-cozy">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
@@ -415,17 +573,17 @@ export default function CareerBankPage() {
         <TabsContent value="explore" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 card-cozy">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Filter className="h-5 w-5" />
                     <span>Advanced Filters</span>
                   </CardTitle>
                   <div className="flex space-x-2">
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="w-fit">
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="btn-cozy-secondary w-fit">
                       Clear All
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
+                    <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)} className="btn-cozy-secondary">
                       {showAdvancedFilters ? "Basic" : "Advanced"}
                     </Button>
                   </div>
@@ -581,6 +739,7 @@ export default function CareerBankPage() {
                       variant={viewMode === "grid" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("grid")}
+                      className={viewMode === "grid" ? "btn-cozy-primary" : "btn-cozy-secondary"}
                     >
                       Grid
                     </Button>
@@ -588,6 +747,7 @@ export default function CareerBankPage() {
                       variant={viewMode === "list" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("list")}
+                      className={viewMode === "list" ? "btn-cozy-primary" : "btn-cozy-secondary"}
                     >
                       List
                     </Button>
@@ -617,14 +777,14 @@ export default function CareerBankPage() {
 
               {/* Career Cards Grid/List */}
               {filteredCareers.length === 0 ? (
-                <Card className="p-8 text-center">
+                <Card className="p-8 text-center card-cozy">
                   <CardContent>
                     <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="font-semibold text-lg mb-2">No careers found</h3>
                     <p className="text-muted-foreground mb-4">
                       Try adjusting your filters or search terms to find more opportunities.
                     </p>
-                    <Button onClick={clearFilters}>Clear Filters</Button>
+                    <Button onClick={clearFilters} className="btn-cozy-secondary">Clear Filters</Button>
                   </CardContent>
                 </Card>
               ) : (
@@ -632,7 +792,7 @@ export default function CareerBankPage() {
                   {filteredCareers.map((career) => (
                     <Card
                       key={career.id}
-                      className={`group hover:shadow-lg transition-all duration-200 ${
+                      className={`card-cozy group hover:shadow-lg transition-all duration-200 ${
                         viewedCareers.includes(career.id) ? "bg-muted/20" : ""
                       } ${viewMode === "list" ? "flex" : ""}`}
                     >
@@ -730,7 +890,7 @@ export default function CareerBankPage() {
                             <Button
                               size="sm"
                               onClick={() => markAsViewed(career.id)}
-                              className="group-hover:bg-primary group-hover:text-primary-foreground"
+                              className="btn-cozy-primary group-hover:bg-primary group-hover:text-primary-foreground"
                             >
                               Learn More
                             </Button>
@@ -747,7 +907,7 @@ export default function CareerBankPage() {
 
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="card-cozy">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <BarChart3 className="h-5 w-5" />
@@ -771,7 +931,7 @@ export default function CareerBankPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-cozy">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Lightbulb className="h-5 w-5" />
@@ -794,7 +954,7 @@ export default function CareerBankPage() {
         </TabsContent>
 
         <TabsContent value="recommendations" className="space-y-6">
-          <Card>
+          <Card className="card-cozy">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Target className="h-5 w-5" />
@@ -807,7 +967,7 @@ export default function CareerBankPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCareers.slice(0, 4).map((career) => (
-                  <Card key={career.id} className="hover:shadow-md transition-all">
+                  <Card key={career.id} className="hover:shadow-md transition-all card-cozy">
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-2">{career.title}</h3>
                       <p className="text-sm text-muted-foreground mb-3">{career.description.substring(0, 100)}...</p>
