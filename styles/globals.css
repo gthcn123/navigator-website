@@ -3,75 +3,88 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 
+  Palette (Neutral + Earthy tones)
+  - Dark brown:   #2A0800
+  - Mid brown:    #775144
+  - Warm beige:   #C09891
+  - Light beige:  #BEA8A7
+  - Very light:   #F4DBD8
+*/
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Main theme (light) */
+  --background: #F4DBD8;           /* page background (light & cozy) */
+  --foreground: #2A0800;           /* primary text */
+  --card: #BEA8A7;                 /* card / section background */
+  --card-foreground: #2A0800;      /* text inside cards */
+  --popover: #BEA8A7;              /* popover background */
+  --popover-foreground: #2A0800;   /* popover text */
+  --primary: #C09891;              /* primary action (buttons) */
+  --primary-foreground: #2A0800;   /* primary button text (dark for contrast) */
+  --secondary: #BEA8A7;            /* secondary controls */
+  --secondary-foreground: #2A0800; /* secondary text */
+  --muted: #BEA8A7;                /* muted backgrounds / subtle UI */
+  --muted-foreground: #775144;     /* muted text */
+  --accent: #775144;               /* accent / hover highlights */
+  --accent-foreground: #F4DBD8;    /* accent on dark bg */
+  /* destructive kept as an action red (can adjust if you want palette-only) */
+  --destructive: #C92A2A;
+  --destructive-foreground: #FFFFFF;
+  --border: #E6D3D1;               /* subtle border (soft) */
+  --input: #FFFFFF;                /* input bg (white for clarity on light) */
+  --ring: #C09891;                 /* focus ring */
+  /* chart colors — small set derived from palette for consistency */
+  --chart-1: #C09891;
+  --chart-2: #775144;
+  --chart-3: #2A0800;
+  --chart-4: #BEA8A7;
+  --chart-5: #F4DBD8;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #F4DBD8;
+  --sidebar-foreground: #2A0800;
+  --sidebar-primary: #C09891;
+  --sidebar-primary-foreground: #2A0800;
+  --sidebar-accent: #775144;
+  --sidebar-accent-foreground: #F4DBD8;
+  --sidebar-border: #E6D3D1;
+  --sidebar-ring: #C09891;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Dark mode mapping — inverse / darker surfaces */
+  --background: #2A0800;           /* dark page background */
+  --foreground: #F4DBD8;           /* light text */
+  --card: #775144;                 /* card slightly lighter than background */
+  --card-foreground: #F4DBD8;      /* text inside cards */
+  --popover: #775144;              /* popover bg */
+  --popover-foreground: #F4DBD8;
+  --primary: #C09891;              /* primary remains warm beige for contrast */
+  --primary-foreground: #2A0800;   /* dark text on primary button */
+  --secondary: #BEA8A7;            /* lighter secondary elements */
+  --secondary-foreground: #2A0800;
+  --muted: #BEA8A7;
+  --muted-foreground: #F4DBD8;
+  --accent: #C09891;               /* accent slightly brighter in dark mode */
+  --accent-foreground: #2A0800;
+  --destructive: #E35B4E;
+  --destructive-foreground: #FFFFFF;
+  --border: #775144;
+  --input: #3E2C28;                /* darker input surface in dark mode */
+  --ring: #C09891;
+  --chart-1: #C09891;
+  --chart-2: #775144;
+  --chart-3: #2A0800;
+  --chart-4: #BEA8A7;
+  --chart-5: #F4DBD8;
+  --sidebar: #2A0800;
+  --sidebar-foreground: #F4DBD8;
+  --sidebar-primary: #C09891;
+  --sidebar-primary-foreground: #F4DBD8;
+  --sidebar-accent: #775144;
+  --sidebar-accent-foreground: #F4DBD8;
+  --sidebar-border: #775144;
+  --sidebar-ring: #C09891;
 }
 
 @theme inline {

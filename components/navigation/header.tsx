@@ -215,26 +215,26 @@ export function Header() {
 
   return (
     <>
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="border-b bg-[#2A0800]/95 backdrop-blur supports-[backdrop-filter]:bg-[#2A0800]/60 sticky top-0 z-50 text-[#F4DBD8]">
         <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex items-center justify-between py-1 sm:py-2 text-xs sm:text-sm border-b">
-            <div className="flex items-center space-x-2 sm:space-x-4 text-muted-foreground">
+          <div className="flex items-center justify-between py-1 sm:py-2 text-xs sm:text-sm border-b border-[#775144]">
+            <div className="flex items-center space-x-2 sm:space-x-4 text-[#BEA8A7]">
               <div className="flex items-center space-x-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3 text-[#BEA8A7]" />
                 <span className="hidden sm:inline text-xs">{currentTime}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3 text-[#BEA8A7]" />
                 <span className="hidden lg:inline text-xs">{location}</span>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <Badge variant="secondary" className="text-xs px-1 sm:px-2">
+              <Badge variant="secondary" className="text-xs px-1 sm:px-2 bg-[#C09891] text-[#2A0800]">
                 <span className="hidden sm:inline">Visitors: </span>
                 {visitorCount.toLocaleString()}
               </Badge>
               {isAuthenticated && userName && (
-                <div className="flex items-center space-x-1 text-primary">
+                <div className="flex items-center space-x-1 text-[#C09891]">
                   {getUserTypeIcon()}
                   <span className="hidden md:inline text-xs">{getPersonalizedGreeting()}</span>
                 </div>
@@ -244,10 +244,10 @@ export function Header() {
 
           <div className="flex items-center justify-between py-2 sm:py-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-6 w-6 sm:h-8 sm:w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-3 w-3 sm:h-5 sm:w-5 text-white" />
+              <div className="h-6 w-6 sm:h-8 sm:w-8 bg-[#C09891] rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-3 w-3 sm:h-5 sm:w-5 text-[#2A0800]" />
               </div>
-              <span className="font-heading font-bold text-lg sm:text-xl text-blue-900">
+              <span className="font-heading font-bold text-lg sm:text-xl text-[#F4DBD8]">
                 <span className="hidden sm:inline">NextStep Navigator</span>
                 <span className="sm:hidden">NextStep</span>
               </span>
@@ -261,8 +261,8 @@ export function Header() {
                       <Link
                         href={item.href}
                         className={cn(
-                          "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                          pathname === item.href && "bg-blue-100 text-blue-800",
+                          "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-[#BEA8A7] hover:text-[#2A0800] focus:bg-[#BEA8A7] focus:text-[#2A0800] focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                          pathname === item.href && "bg-[#BEA8A7] text-[#2A0800]",
                         )}
                       >
                         <span className="mr-2">{item.icon}</span>
@@ -273,42 +273,42 @@ export function Header() {
                 ))}
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="hover:bg-blue-50 hover:text-blue-700">More</NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="hover:bg-[#BEA8A7] hover:text-[#2A0800]">More</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="grid gap-3 p-4 w-[400px]">
-                      <Link href="/bookmarks" className="flex items-center space-x-2 p-2 rounded-md hover:bg-blue-50">
-                        <BookOpen className="h-4 w-4 text-blue-600" />
+                      <Link href="/bookmarks" className="flex items-center space-x-2 p-2 rounded-md hover:bg-[#BEA8A7]">
+                        <BookOpen className="h-4 w-4 text-[#C09891]" />
                         <div>
-                          <div className="font-medium">My Bookmarks</div>
-                          <div className="text-sm text-muted-foreground">Saved careers and notes</div>
+                          <div className="font-medium text-[#2A0800]">My Bookmarks</div>
+                          <div className="text-sm text-[#BEA8A7]">Saved careers and notes</div>
                         </div>
                       </Link>
-                      <Link href="/resume" className="flex items-center space-x-2 p-2 rounded-md hover:bg-blue-50">
-                        <FileText className="h-4 w-4 text-blue-600" />
+                      <Link href="/resume" className="flex items-center space-x-2 p-2 rounded-md hover:bg-[#BEA8A7]">
+                        <FileText className="h-4 w-4 text-[#C09891]" />
                         <div>
-                          <div className="font-medium">Resume Guidelines</div>
-                          <div className="text-sm text-muted-foreground">Professional resume writing tips</div>
+                          <div className="font-medium text-[#2A0800]">Resume Guidelines</div>
+                          <div className="text-sm text-[#BEA8A7]">Professional resume writing tips</div>
                         </div>
                       </Link>
-                      <Link href="/interview" className="flex items-center space-x-2 p-2 rounded-md hover:bg-blue-50">
-                        <MessageSquare className="h-4 w-4 text-blue-600" />
+                      <Link href="/interview" className="flex items-center space-x-2 p-2 rounded-md hover:bg-[#BEA8A7]">
+                        <MessageSquare className="h-4 w-4 text-[#C09891]" />
                         <div>
-                          <div className="font-medium">Interview Tips</div>
-                          <div className="text-sm text-muted-foreground">Master your interview skills</div>
+                          <div className="font-medium text-[#2A0800]">Interview Tips</div>
+                          <div className="text-sm text-[#BEA8A7]">Master your interview skills</div>
                         </div>
                       </Link>
-                      <Link href="/contact" className="flex items-center space-x-2 p-2 rounded-md hover:bg-blue-50">
-                        <Phone className="h-4 w-4 text-blue-600" />
+                      <Link href="/contact" className="flex items-center space-x-2 p-2 rounded-md hover:bg-[#BEA8A7]">
+                        <Phone className="h-4 w-4 text-[#C09891]" />
                         <div>
-                          <div className="font-medium">Contact Us</div>
-                          <div className="text-sm text-muted-foreground">Get in touch with our team</div>
+                          <div className="font-medium text-[#2A0800]">Contact Us</div>
+                          <div className="text-sm text-[#BEA8A7]">Get in touch with our team</div>
                         </div>
                       </Link>
-                      <Link href="/about" className="flex items-center space-x-2 p-2 rounded-md hover:bg-blue-50">
-                        <Info className="h-4 w-4 text-blue-600" />
+                      <Link href="/about" className="flex items-center space-x-2 p-2 rounded-md hover:bg-[#BEA8A7]">
+                        <Info className="h-4 w-4 text-[#C09891]" />
                         <div>
-                          <div className="font-medium">About Us</div>
-                          <div className="text-sm text-muted-foreground">Learn about our mission</div>
+                          <div className="font-medium text-[#2A0800]">About Us</div>
+                          <div className="text-sm text-[#BEA8A7]">Learn about our mission</div>
                         </div>
                       </Link>
                     </div>
@@ -321,16 +321,16 @@ export function Header() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="hidden md:flex">
-                      <User className="h-4 w-4 mr-2" />
+                    <Button variant="ghost" size="sm" className="hidden md:flex text-[#C09891]">
+                      <User className="h-4 w-4 mr-2 text-[#C09891]" />
                       {userName}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="bg-[#2A0800] text-[#F4DBD8] border border-[#775144]">
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard">Dashboard</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem onClick={handleLogout} className="flex items-center">
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
                     </DropdownMenuItem>
@@ -341,7 +341,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hidden sm:flex text-blue-700 hover:bg-blue-50"
+                    className="hidden sm:flex text-[#C09891] hover:bg-[#775144] hover:text-[#F4DBD8]"
                     onClick={() => {
                       setAuthMode("login")
                       setShowAuthModal(true)
@@ -352,7 +352,7 @@ export function Header() {
                   </Button>
                   <Button
                     size="sm"
-                    className="hidden sm:flex bg-blue-600 hover:bg-blue-700"
+                    className="hidden sm:flex bg-[#C09891] hover:bg-[#775144] text-[#2A0800]"
                     onClick={() => {
                       setAuthMode("signup")
                       setShowAuthModal(true)
@@ -365,11 +365,11 @@ export function Header() {
 
               <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <DropdownMenuTrigger asChild className="lg:hidden">
-                  <Button variant="ghost" size="sm" className="p-1 sm:p-2">
+                  <Button variant="ghost" size="sm" className="p-1 sm:p-2 text-[#F4DBD8]">
                     <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 bg-[#2A0800] text-[#F4DBD8] border border-[#775144]">
                   {!isAuthenticated && (
                     <>
                       <DropdownMenuItem
@@ -424,6 +424,7 @@ export function Header() {
       {showAuthModal && (
         <AuthModal
           mode={authMode}
+          setAuthMode={setAuthMode}
           onClose={() => setShowAuthModal(false)}
           onLogin={handleLogin}
           onSignup={handleSignup}
@@ -435,11 +436,13 @@ export function Header() {
 
 function AuthModal({
   mode,
+  setAuthMode,
   onClose,
   onLogin,
   onSignup,
 }: {
   mode: "login" | "signup"
+  setAuthMode?: (m: "login" | "signup") => void
   onClose: () => void
   onLogin: (email: string, password: string) => void
   onSignup: (name: string, email: string, password: string, userType: string) => void
@@ -462,10 +465,10 @@ function AuthModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-[#F4DBD8] rounded-lg p-6 w-full max-w-md border border-[#BEA8A7]">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-blue-900">{mode === "login" ? "Login" : "Sign Up"}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <h2 className="text-xl font-bold text-[#2A0800]">{mode === "login" ? "Login" : "Sign Up"}</h2>
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-[#775144] hover:text-[#2A0800]">
             ×
           </Button>
         </div>
@@ -473,11 +476,11 @@ function AuthModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "signup" && (
             <div>
-              <label className="block text-sm font-medium mb-1">Name</label>
+              <label className="block text-sm font-medium mb-1 text-[#775144]">Name</label>
               <input
                 type="text"
                 required
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md border-[#BEA8A7] bg-white text-[#2A0800] focus:outline-none focus:ring-2 focus:ring-[#C09891]"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -485,22 +488,22 @@ function AuthModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1 text-[#775144]">Email</label>
             <input
               type="email"
               required
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md border-[#BEA8A7] bg-white text-[#2A0800] focus:outline-none focus:ring-2 focus:ring-[#C09891]"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className="block text-sm font-medium mb-1 text-[#775144]">Password</label>
             <input
               type="password"
               required
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md border-[#BEA8A7] bg-white text-[#2A0800] focus:outline-none focus:ring-2 focus:ring-[#C09891]"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
@@ -508,9 +511,9 @@ function AuthModal({
 
           {mode === "signup" && (
             <div>
-              <label className="block text-sm font-medium mb-1">I am a...</label>
+              <label className="block text-sm font-medium mb-1 text-[#775144]">I am a...</label>
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md border-[#BEA8A7] bg-white text-[#2A0800] focus:outline-none focus:ring-2 focus:ring-[#C09891]"
                 value={formData.userType}
                 onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
               >
@@ -521,7 +524,7 @@ function AuthModal({
             </div>
           )}
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" className="w-full bg-[#C09891] text-[#2A0800] hover:bg-[#775144]">
             {mode === "login" ? "Login" : "Sign Up"}
           </Button>
         </form>
@@ -529,8 +532,8 @@ function AuthModal({
         <div className="mt-4 text-center">
           <button
             type="button"
-            className="text-blue-600 hover:underline text-sm"
-            onClick={() => (mode === "login" ? setAuthMode("signup") : setAuthMode("login"))}
+            className="text-[#2A0800] hover:underline text-sm"
+            onClick={() => (setAuthMode ? setAuthMode(mode === "login" ? "signup" : "login") : null)}
           >
             {mode === "login" ? "Don't have an account? Sign up" : "Already have an account? Login"}
           </button>

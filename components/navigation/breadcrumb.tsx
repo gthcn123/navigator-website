@@ -34,14 +34,20 @@ export function BreadcrumbNav() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-3 border-b bg-muted/30">
+    <div
+      className="container mx-auto px-4 py-3 border-b"
+      style={{ backgroundColor: "#F4DBD8", borderColor: "#775144" }}
+    >
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/" className="flex items-center space-x-1">
-                <Home className="h-4 w-4" />
-                <span>Home</span>
+              <Link
+                href="/"
+                className="flex items-center space-x-1 text-[#775144] hover:text-[#2A0800] transition-colors"
+              >
+                <Home className="h-4 w-4 text-[#775144]" />
+                <span className="text-sm">Home</span>
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -49,19 +55,27 @@ export function BreadcrumbNav() {
           {pathSegments.map((segment, index) => {
             const href = "/" + pathSegments.slice(0, index + 1).join("/")
             const isLast = index === pathSegments.length - 1
-            const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
+            const label =
+              routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
 
             return (
               <div key={segment} className="flex items-center">
                 <BreadcrumbSeparator>
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 text-[#775144]" />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   {isLast ? (
-                    <BreadcrumbPage>{label}</BreadcrumbPage>
+                    <BreadcrumbPage>
+                      <span className="text-[#2A0800] font-medium text-sm">{label}</span>
+                    </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link href={href}>{label}</Link>
+                      <Link
+                        href={href}
+                        className="text-sm text-[#775144] hover:text-[#2A0800] transition-colors"
+                      >
+                        {label}
+                      </Link>
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>

@@ -4,16 +4,25 @@ import { ChevronRight, MoreHorizontal } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+// ✅ Container للـ breadcrumb
 function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
+  return (
+    <nav
+      aria-label="breadcrumb"
+      data-slot="breadcrumb"
+      className="w-full"
+      {...props}
+    />
+  )
 }
 
+// ✅ قائمة العناصر
 function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        'text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5',
+        'flex flex-wrap items-center gap-1.5 sm:gap-2.5 break-words text-sm text-muted-foreground',
         className,
       )}
       {...props}
@@ -21,6 +30,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   )
 }
 
+// ✅ العنصر نفسه (li)
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
@@ -31,24 +41,27 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   )
 }
 
+// ✅ الروابط
 function BreadcrumbLink({
   asChild,
   className,
   ...props
-}: React.ComponentProps<'a'> & {
-  asChild?: boolean
-}) {
+}: React.ComponentProps<'a'> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : 'a'
 
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn('hover:text-foreground transition-colors', className)}
+      className={cn(
+        'transition-colors hover:text-foreground text-muted-foreground',
+        className,
+      )}
       {...props}
     />
   )
 }
 
+// ✅ الصفحة الحالية
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
     <span
@@ -56,12 +69,13 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn('text-foreground font-normal', className)}
+      className={cn('font-medium text-foreground', className)}
       {...props}
     />
   )
 }
 
+// ✅ الفاصل (separator)
 function BreadcrumbSeparator({
   children,
   className,
@@ -72,7 +86,7 @@ function BreadcrumbSeparator({
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn('[&>svg]:size-3.5', className)}
+      className={cn('flex items-center [&>svg]:size-3.5 text-muted-foreground', className)}
       {...props}
     >
       {children ?? <ChevronRight />}
@@ -80,6 +94,7 @@ function BreadcrumbSeparator({
   )
 }
 
+// ✅ Ellipsis عند كثرة العناصر
 function BreadcrumbEllipsis({
   className,
   ...props
@@ -89,7 +104,10 @@ function BreadcrumbEllipsis({
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={cn('flex size-9 items-center justify-center', className)}
+      className={cn(
+        'flex size-9 items-center justify-center text-muted-foreground',
+        className,
+      )}
       {...props}
     >
       <MoreHorizontal className="size-4" />

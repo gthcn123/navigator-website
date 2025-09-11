@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
-
 import { cn } from '@/lib/utils'
 
 function Avatar({
@@ -13,7 +12,9 @@ function Avatar({
     <AvatarPrimitive.Root
       data-slot="avatar"
       className={cn(
-        'relative flex size-8 shrink-0 overflow-hidden rounded-full',
+        // الحجم الافتراضي دائماً دائري مع ظل خفيف
+        'relative flex size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-border shadow-sm',
+        'transition-transform hover:scale-105',
         className,
       )}
       {...props}
@@ -28,7 +29,10 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn('aspect-square size-full', className)}
+      className={cn(
+        'aspect-square size-full object-cover',
+        className,
+      )}
       {...props}
     />
   )
@@ -36,17 +40,23 @@ function AvatarImage({
 
 function AvatarFallback({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
+      delayMs={300}
       className={cn(
-        'bg-muted flex size-full items-center justify-center rounded-full',
+        // fallback بخلفية هادئة + نص أنيق
+        'flex size-full items-center justify-center rounded-full',
+        'bg-muted text-foreground/70 text-sm font-medium select-none',
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </AvatarPrimitive.Fallback>
   )
 }
 
