@@ -75,15 +75,12 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-/* Added Google Fonts import for Space Grotesk and DM Sans */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
-
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  /* Updated font configuration to use Space Grotesk and DM Sans */
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
-  /* Added custom font families for career platform */
-  --font-heading: "Space Grotesk", var(--font-geist-sans);
-  --font-body: "DM Sans", var(--font-geist-sans);
+  --font-heading: var(--font-space-grotesk);
+  --font-body: var(--font-dm-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -128,17 +125,49 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Enhanced typography and responsive text sizing */
+    font-feature-settings: "rlig" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  /* Added typography classes for headings and body text */
+
+  /* Added responsive typography classes */
   .font-heading {
     font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
   }
+
   .font-body {
     font-family: var(--font-body);
+    line-height: 1.6;
+  }
+
+  /* Enhanced responsive text classes */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Improved focus styles for accessibility */
+  .focus-visible\:outline-none:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .focus-visible\:ring-2:focus-visible {
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
   }
 }
 
-/* Added custom animations for career platform */
+/* Enhanced animations and responsive utilities */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -160,10 +189,74 @@
   }
 }
 
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+/* Added responsive utilities for better mobile experience */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+/* Enhanced print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .bg-gradient-to-br {
+    background: white !important;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-pulse-glow,
+  .animate-slide-in-left {
+    animation: none;
+  }
+
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
