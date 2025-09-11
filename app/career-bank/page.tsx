@@ -324,21 +324,23 @@ export default function CareerBankPage() {
       <div className="container mx-auto px-4 py-8" style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}>
         <style jsx global>{`
           :root{
-            --cozy-bg: #F4DBD8;               /* Background */
-            --cozy-text: #2A0800;             /* Primary Text */
-            --cozy-muted: #775144;            /* Secondary Text */
-            --cozy-btn-primary: #C09891;      /* Primary Button */
-            --cozy-btn-primary-hover: #775144;/* Primary Button Hover */
-            --cozy-btn-primary-text-dark: #2A0800;
-            --cozy-btn-primary-text-light: #ffffff;
-            --cozy-btn-secondary: #BEA8A7;    /* Secondary Button */
-            --cozy-btn-secondary-hover: #C09891;
-            --cozy-navbar: #2A0800;           /* Navbar */
-            --cozy-footer: #2A0800;
-            --cozy-card-bg: #BEA8A7;
-            --cozy-card-text: #2A0800;
-            --cozy-heading: #C09891;
-            --cozy-heading-alt: #D98E82;
+            /* Dark palette applied */
+            --cozy-bg: #190019;               /* Main Background */
+            --cozy-text: #FBE4D8;             /* Primary Text / Light Backgrounds */
+            --cozy-muted: #854F6C;            /* Subheadings / Secondary Text */
+            --cozy-btn-primary: #DFB6B2;      /* Buttons / Cards / Accents */
+            --cozy-btn-primary-hover: #d1aead;/* slightly darker/lighter hover (tweak if needed) */
+            --cozy-btn-primary-text-dark: #190019; /* Dark text to sit on accent backgrounds */
+            --cozy-btn-primary-text-light: #190019; /* using dark text on accent for contrast */
+            --cozy-btn-secondary: #522B5B;    /* Secondary accents - use sidebar color */
+            --cozy-btn-secondary-hover: #4a254f;
+            --cozy-navbar: #2B124C;           /* Header & Footer */
+            --cozy-footer: #2B124C;
+            --cozy-card-bg: #DFB6B2;          /* Card Background (accent) */
+            --cozy-card-text: #190019;        /* Card Text (dark) */
+            --cozy-heading: #DFB6B2;          /* Headings (accent) */
+            --cozy-heading-alt: #854F6C;      /* Alternate heading / hover */
+            --cozy-section: #522B5B;          /* Sidebars / Sections */
           }
 
           body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
@@ -364,25 +366,27 @@ export default function CareerBankPage() {
             background: var(--cozy-card-bg) !important;
             color: var(--cozy-card-text) !important;
             border-radius: 12px !important;
-            box-shadow: 0 6px 18px rgba(42,8,0,0.06) !important;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
+            border: 1px solid rgba(255,255,255,0.03);
           }
 
           /* Buttons (best-effort override) */
           .btn-cozy-primary {
             background: var(--cozy-btn-primary) !important;
-            color: var(--cozy-btn-primary-text-light) !important;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
-            box-shadow: 0 6px 14px rgba(33,10,8,0.10);
-          }
-          .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-light) !important; }
-
-          .btn-cozy-secondary {
-            background: var(--cozy-btn-secondary) !important;
             color: var(--cozy-btn-primary-text-dark) !important;
             font-weight: 600;
             border-radius: 10px;
+            transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+          }
+          .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-dark) !important; }
+
+          .btn-cozy-secondary {
+            background: var(--cozy-btn-secondary) !important;
+            color: var(--cozy-text) !important;
+            font-weight: 600;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.02);
           }
           .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
 
@@ -394,13 +398,13 @@ export default function CareerBankPage() {
           a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
 
           /* Badge tweaks */
-          .badge { border-radius: 8px !important; }
+          .badge { border-radius: 8px !important; background: transparent; color: var(--cozy-text) !important; border: 1px solid rgba(255,255,255,0.04); }
 
         `}</style>
 
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
             <p className="text-muted-foreground">Loading career opportunities...</p>
           </div>
         </div>
@@ -413,24 +417,26 @@ export default function CareerBankPage() {
       className="container mx-auto px-4 py-8"
       style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}
     >
-      {/* Global CSS variables + overrides */}
+      {/* Global CSS variables + overrides (dark palette) */}
       <style jsx global>{`
         :root{
-          --cozy-bg: #F4DBD8;               /* Background */
-          --cozy-text: #2A0800;             /* Primary Text */
-          --cozy-muted: #775144;            /* Secondary Text */
-          --cozy-btn-primary: #C09891;      /* Primary Button */
-          --cozy-btn-primary-hover: #775144;/* Primary Button Hover */
-          --cozy-btn-primary-text-dark: #2A0800;
-          --cozy-btn-primary-text-light: #ffffff;
-          --cozy-btn-secondary: #BEA8A7;    /* Secondary Button */
-          --cozy-btn-secondary-hover: #C09891;
-          --cozy-navbar: #2A0800;           /* Navbar */
-          --cozy-footer: #2A0800;
-          --cozy-card-bg: #BEA8A7;
-          --cozy-card-text: #2A0800;
-          --cozy-heading: #C09891;
-          --cozy-heading-alt: #D98E82;
+          /* Dark palette applied */
+          --cozy-bg: #190019;               /* Main Background */
+          --cozy-text: #FBE4D8;             /* Primary Text / Light Backgrounds */
+          --cozy-muted: #854F6C;            /* Subheadings / Secondary Text */
+          --cozy-btn-primary: #DFB6B2;      /* Buttons / Cards / Accents */
+          --cozy-btn-primary-hover: #d1aead;
+          --cozy-btn-primary-text-dark: #190019;
+          --cozy-btn-primary-text-light: #190019;
+          --cozy-btn-secondary: #522B5B;    /* Secondary accents / sections */
+          --cozy-btn-secondary-hover: #4a254f;
+          --cozy-navbar: #2B124C;           /* Header & Footer */
+          --cozy-footer: #2B124C;
+          --cozy-card-bg: #DFB6B2;          /* Card Background (accent) */
+          --cozy-card-text: #190019;        /* Card Text (dark) */
+          --cozy-heading: #DFB6B2;          /* Headings (accent) */
+          --cozy-heading-alt: #854F6C;      /* Alternate heading / hover */
+          --cozy-section: #522B5B;          /* Sidebars / Sections */
         }
 
         body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
@@ -456,25 +462,27 @@ export default function CareerBankPage() {
           background: var(--cozy-card-bg) !important;
           color: var(--cozy-card-text) !important;
           border-radius: 12px !important;
-          box-shadow: 0 6px 18px rgba(42,8,0,0.06) !important;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
+          border: 1px solid rgba(255,255,255,0.03);
         }
 
         /* Buttons (best-effort override) */
         .btn-cozy-primary {
           background: var(--cozy-btn-primary) !important;
-          color: var(--cozy-btn-primary-text-light) !important;
-          font-weight: 600;
-          border-radius: 10px;
-          transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
-          box-shadow: 0 6px 14px rgba(33,10,8,0.10);
-        }
-        .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-light) !important; }
-
-        .btn-cozy-secondary {
-          background: var(--cozy-btn-secondary) !important;
           color: var(--cozy-btn-primary-text-dark) !important;
           font-weight: 600;
           border-radius: 10px;
+          transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-dark) !important; }
+
+        .btn-cozy-secondary {
+          background: var(--cozy-btn-secondary) !important;
+          color: var(--cozy-text) !important;
+          font-weight: 600;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.02);
         }
         .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
 
@@ -486,7 +494,7 @@ export default function CareerBankPage() {
         a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
 
         /* Badge tweaks */
-        .badge { border-radius: 8px !important; }
+        .badge { border-radius: 8px !important; background: transparent; color: var(--cozy-text) !important; border: 1px solid rgba(255,255,255,0.04); }
 
       `}</style>
 
