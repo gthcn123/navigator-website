@@ -84,7 +84,7 @@ const navigationItems: NavigationItem[] = [
   },
   {
     title: "Admission & Coaching",
-    href: "/coaching",
+    href: "/admission",
     description: "Study abroad and interview tips",
     icon: <GraduationCap className="h-4 w-4" />,
     userTypes: ["student", "graduate"],
