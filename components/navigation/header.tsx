@@ -33,6 +33,8 @@ import {
   Phone,
   Info,
   LogIn,
+  FileText,
+  MessageSquare,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -236,6 +238,20 @@ export function Header() {
                         <div className="text-sm text-muted-foreground">Saved careers and notes</div>
                       </div>
                     </Link>
+                    <Link href="/resume" className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                      <FileText className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Resume Guidelines</div>
+                        <div className="text-sm text-muted-foreground">Professional resume writing tips</div>
+                      </div>
+                    </Link>
+                    <Link href="/interview" className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
+                      <MessageSquare className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Interview Tips</div>
+                        <div className="text-sm text-muted-foreground">Master your interview skills</div>
+                      </div>
+                    </Link>
                     <Link href="/contact" className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
                       <Phone className="h-4 w-4" />
                       <div>
@@ -286,6 +302,18 @@ export function Header() {
                   <Link href="/bookmarks" className="flex items-center space-x-2">
                     <BookOpen className="h-4 w-4" />
                     <span>My Bookmarks</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/resume" className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Resume Guidelines</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/interview" className="flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Interview Tips</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
