@@ -13,12 +13,16 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 })
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 })
 
 export const metadata: Metadata = {
@@ -33,6 +37,13 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+  robots: "index, follow",
+  openGraph: {
+    title: "NextStep Navigator - Career Guidance Platform",
+    description: "Discover your perfect career path with personalized guidance and expert insights.",
+    type: "website",
+    locale: "en_US",
+  },
 }
 
 export default function RootLayout({
@@ -42,42 +53,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${dmSans.variable}`}>
-      <head><script
-  dangerouslySetInnerHTML={{
-    __html: `
-      (function() {
-        try {
-          var theme = localStorage.getItem('theme');
-          if (!theme) {
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            theme = prefersDark ? 'dark' : 'light';
-          }
-          document.documentElement.classList.remove('dark');
-          if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-          }
-        } catch(e) {}
-      })();
-    `,
-  }}
-/>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('ns_theme_v1');
+                  if (!theme) {
+                    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    theme = prefersDark ? 'dark' : 'light';
+                  }
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vercel.live" />
 
         <style
           dangerouslySetInnerHTML={{
             __html: `
             :root {
-              --font-space-grotesk: ${spaceGrotesk.style?.fontFamily || "Space Grotesk"}, sans-serif;
-              --font-dm-sans: ${dmSans.style?.fontFamily || "DM Sans"}, sans-serif;
-
-              --background: var(--background);
-              --foreground: var(--foreground);
-              --card: var(--card);
-              --card-border: var(--border);
-              --primary: var(--primary);
-              --secondary: var(--secondary);
-              --muted: var(--muted);
-              --accent: var(--accent);
-              --radius: var(--radius);
+              --font-space-grotesk: ${spaceGrotesk.style?.fontFamily || "Space Grotesk"}, system-ui, sans-serif;
+              --font-dm-sans: ${dmSans.style?.fontFamily || "DM Sans"}, system-ui, sans-serif;
             }
 
             body {
@@ -85,30 +90,35 @@ export default function RootLayout({
               font-family: var(--font-dm-sans);
               -webkit-font-smoothing: antialiased;
               -moz-osx-font-smoothing: grayscale;
-              background-color: var(--background);
-              color: var(--foreground);
+              background-color: var(--color-background);
+              color: var(--color-foreground);
             }
 
-            .skip-link {
-              position: absolute;
-              left: 1rem;
-              top: 1rem;
-              z-index: 9999;
-              padding: 0.5rem 0.75rem;
-              border-radius: var(--radius);
-              background-color: var(--card);
-              color: var(--foreground);
-              transform: translateY(-120%);
-              transition: transform 0.18s ease;
-            }
-            .skip-link:focus { transform: translateY(0%); outline: 2px solid var(--primary); }
-
+            /* Critical CSS for above-the-fold content */
             .container {
-              max-width: var(--container-max);
+              max-width: 1200px;
               margin-left: auto;
               margin-right: auto;
               padding-left: 1rem;
               padding-right: 1rem;
+            }
+
+            /* Loading states */
+            .loading-skeleton {
+              background: linear-gradient(90deg, var(--color-muted) 25%, var(--color-card) 50%, var(--color-muted) 75%);
+              background-size: 200% 100%;
+              animation: loading 1.5s infinite;
+            }
+
+            @keyframes loading {
+              0% { background-position: 200% 0; }
+              100% { background-position: -200% 0; }
+            }
+
+            /* Reduce layout shift */
+            img, video {
+              max-width: 100%;
+              height: auto;
             }
           `,
           }}
@@ -116,17 +126,82 @@ export default function RootLayout({
       </head>
 
       <body className="font-body min-h-screen flex flex-col">
-        <a className="skip-link" href="#main">Skip to content</a>
+        <a
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+          href="#main"
+        >
+          Skip to content
+        </a>
 
-        <Header />
-        <BreadcrumbNav />
+        <Suspense fallback={<HeaderSkeleton />}>
+          <Header />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <BreadcrumbNav />
+        </Suspense>
+
         <main id="main" className="flex-1">
-          <Suspense fallback={null}>{children}</Suspense>
+          <Suspense fallback={<MainContentSkeleton />}>{children}</Suspense>
         </main>
-        <Footer />
+
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+
         <Toaster />
         <Analytics />
       </body>
     </html>
+  )
+}
+
+function HeaderSkeleton() {
+  return (
+    <header className="border-b sticky top-0 z-50 bg-background/80 backdrop-blur-md">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between py-2 text-sm border-b border-border/50">
+          <div className="flex items-center space-x-4">
+            <div className="h-3 w-20 loading-skeleton rounded"></div>
+            <div className="h-3 w-24 loading-skeleton rounded"></div>
+          </div>
+          <div className="h-6 w-16 loading-skeleton rounded"></div>
+        </div>
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 loading-skeleton rounded-xl"></div>
+            <div className="h-6 w-32 loading-skeleton rounded"></div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="h-8 w-20 loading-skeleton rounded"></div>
+            <div className="h-8 w-20 loading-skeleton rounded"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function MainContentSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start mb-16">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="space-y-6">
+              <div className="h-16 w-full loading-skeleton rounded-lg"></div>
+              <div className="h-6 w-3/4 loading-skeleton rounded"></div>
+            </div>
+            <div className="h-12 w-full loading-skeleton rounded-lg"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-48 loading-skeleton rounded-xl"></div>
+              ))}
+            </div>
+          </div>
+          <div className="h-96 loading-skeleton rounded-xl"></div>
+        </div>
+      </div>
+    </div>
   )
 }
