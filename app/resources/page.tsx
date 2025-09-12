@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react";
 import {
   Search,
   Download,
@@ -19,14 +19,15 @@ import {
   FolderOpen,
   Plus,
   Trash2,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
+} from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -34,249 +35,260 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Resource {
-  id: string
-  title: string
-  description: string
-  type: "Article" | "eBook" | "Checklist" | "Webinar" | "Template" | "Course" | "Podcast"
-  category: string
-  userType: string[]
-  fileUrl?: string
-  externalUrl?: string
-  size?: string
-  format?: string
-  downloadCount: number
-  featured: boolean
-  rating?: number
-  duration?: string
-  difficulty?: "Beginner" | "Intermediate" | "Advanced"
-  tags?: string[]
-  author?: string
-  publishDate?: string
-  lastUpdated?: string
-  views?: number
-  likes?: number
+  id: string;
+  title: string;
+  description: string;
+  type: "Article" | "eBook" | "Checklist" | "Webinar" | "Template" | "Course" | "Podcast";
+  category: string;
+  userType: string[];
+  fileUrl?: string;
+  externalUrl?: string;
+  size?: string;
+  format?: string;
+  downloadCount: number;
+  featured: boolean;
+  rating?: number;
+  duration?: string;
+  difficulty?: "Beginner" | "Intermediate" | "Advanced";
+  tags?: string[];
+  author?: string;
+  publishDate?: string;
+  lastUpdated?: string;
+  views?: number;
+  likes?: number;
 }
 
 interface Collection {
-  id: string
-  name: string
-  description: string
-  resources: string[]
-  isPublic: boolean
-  createdAt: string
+  id: string;
+  name: string;
+  description: string;
+  resources: string[];
+  isPublic: boolean;
+  createdAt: string;
 }
 
 interface ResourceStats {
-  totalResources: number
-  totalDownloads: number
-  averageRating: number
-  popularCategories: string[]
+  totalResources: number;
+  totalDownloads: number;
+  averageRating: number;
+  popularCategories: string[];
+}
+
+/* =======================
+   Motion helpers + Counter
+   ======================= */
+const stagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
+
+function AnimatedCounter({
+  value,
+  duration = 1000,
+  decimals = 0,
+}: {
+  value: number;
+  duration?: number;
+  decimals?: number;
+}) {
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const inView = useInView(spanRef, { once: true, amount: 0.6 });
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const start = performance.now();
+    const step = (t: number) => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(value * eased);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [inView, value, duration]);
+
+  const nf = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+  const displayed = decimals ? Number(n.toFixed(decimals)) : Math.round(n);
+
+  return <span ref={spanRef}>{nf.format(displayed)}</span>;
 }
 
 export default function ResourceLibrary() {
-  const [resources, setResources] = useState<Resource[]>([])
-  const [filteredResources, setFilteredResources] = useState<Resource[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [difficultyFilter, setDifficultyFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("featured")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [loading, setLoading] = useState(true)
-  const [bookmarkedResources, setBookmarkedResources] = useState<string[]>([])
-  const [likedResources, setLikedResources] = useState<string[]>([])
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [resourceStats, setResourceStats] = useState<ResourceStats | null>(null)
-  const [newCollectionName, setNewCollectionName] = useState("")
-  const [newCollectionDescription, setNewCollectionDescription] = useState("")
-  const [selectedResourceForCollection, setSelectedResourceForCollection] = useState<string | null>(null)
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("featured");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [loading, setLoading] = useState(true);
+  const [bookmarkedResources, setBookmarkedResources] = useState<string[]>([]);
+  const [likedResources, setLikedResources] = useState<string[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [resourceStats, setResourceStats] = useState<ResourceStats | null>(null);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [newCollectionDescription, setNewCollectionDescription] = useState("");
 
+  // Load from JSON + localStorage
   useEffect(() => {
     const loadResources = async () => {
       try {
-        const response = await fetch("/data/resources.json")
-        const data = await response.json()
+        const res = await fetch("/data/resources.json", { cache: "no-store" });
+        const data: Resource[] = await res.json();
 
-        const enhancedResources = data.map((resource: Resource) => ({
-          ...resource,
-          rating: Math.random() * 2 + 3, // 3-5 star rating
-          duration:
-            resource.type === "Webinar" || resource.type === "Course"
-              ? `${Math.floor(Math.random() * 120) + 30}min`
-              : undefined,
-          difficulty: ["Beginner", "Intermediate", "Advanced"][Math.floor(Math.random() * 3)] as Resource["difficulty"],
-          tags: [
-            "Career Planning",
-            "Interview Skills",
-            "Resume Writing",
-            "Networking",
-            "Leadership",
-            "Skill Development",
-          ].slice(0, Math.floor(Math.random() * 4) + 2),
-          author: ["Dr. Sarah Johnson", "Michael Chen", "Emily Rodriguez", "David Kim", "Lisa Thompson"][
-            Math.floor(Math.random() * 5)
-          ],
-          publishDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          lastUpdated: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          views: Math.floor(Math.random() * 5000) + 500,
-          likes: Math.floor(Math.random() * 200) + 20,
-        }))
-
-        setResources(enhancedResources)
-        setFilteredResources(enhancedResources)
+        setResources(data);
+        setFilteredResources(data);
 
         const stats: ResourceStats = {
-          totalResources: enhancedResources.length,
-          totalDownloads: enhancedResources.reduce((sum, r) => sum + r.downloadCount, 0),
-          averageRating: enhancedResources.reduce((sum, r) => sum + (r.rating || 0), 0) / enhancedResources.length,
-          popularCategories: [...new Set(enhancedResources.map((r) => r.category))].slice(0, 5),
-        }
-        setResourceStats(stats)
+          totalResources: data.length,
+          totalDownloads: data.reduce((sum, r) => sum + (r.downloadCount || 0), 0),
+          averageRating: data.length ? data.reduce((s, r) => s + (r.rating || 0), 0) / data.length : 0,
+          popularCategories: [...new Set(data.map((r) => r.category))].slice(0, 5),
+        };
+        setResourceStats(stats);
       } catch (error) {
-        console.error("Error loading resources:", error)
+        console.error("Error loading resources:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadResources()
+    loadResources();
 
-    const bookmarked = localStorage.getItem("bookmarkedResources")
-    const liked = localStorage.getItem("likedResources")
-    const savedCollections = localStorage.getItem("resourceCollections")
+    // localStorage boot
+    setBookmarkedResources(JSON.parse(localStorage.getItem("bookmarkedResources") || "[]"));
+    setLikedResources(JSON.parse(localStorage.getItem("likedResources") || "[]"));
+    setCollections(JSON.parse(localStorage.getItem("resourceCollections") || "[]"));
+  }, []);
 
-    if (bookmarked) setBookmarkedResources(JSON.parse(bookmarked))
-    if (liked) setLikedResources(JSON.parse(liked))
-    if (savedCollections) setCollections(JSON.parse(savedCollections))
-  }, [])
-
+  // Filtering & sorting
   useEffect(() => {
-    let filtered = resources
+    let filtered = [...resources];
 
     if (searchTerm) {
+      const q = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (resource) =>
-          resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          resource.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          resource.tags?.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
-      )
+        (r) =>
+          r.title.toLowerCase().includes(q) ||
+          r.description.toLowerCase().includes(q) ||
+          r.author?.toLowerCase().includes(q) ||
+          r.tags?.some((tag) => tag.toLowerCase().includes(q)),
+      );
     }
 
-    if (typeFilter !== "all") {
-      filtered = filtered.filter((resource) => resource.type === typeFilter)
-    }
-
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter((resource) => resource.category === categoryFilter)
-    }
-
-    if (difficultyFilter !== "all") {
-      filtered = filtered.filter((resource) => resource.difficulty === difficultyFilter)
-    }
+    if (typeFilter !== "all") filtered = filtered.filter((r) => r.type === (typeFilter as Resource["type"]));
+    if (categoryFilter !== "all") filtered = filtered.filter((r) => r.category === categoryFilter);
+    if (difficultyFilter !== "all") filtered = filtered.filter((r) => r.difficulty === difficultyFilter);
 
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "featured":
-          if (a.featured && !b.featured) return -1
-          if (!a.featured && b.featured) return 1
-          return (b.rating || 0) - (a.rating || 0)
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          return (b.rating || 0) - (a.rating || 0);
         case "newest":
-          return new Date(b.publishDate || 0).getTime() - new Date(a.publishDate || 0).getTime()
+          return new Date(b.publishDate || 0).getTime() - new Date(a.publishDate || 0).getTime();
         case "popular":
-          return (b.views || 0) - (a.views || 0)
+          return (b.views || 0) - (a.views || 0);
         case "rating":
-          return (b.rating || 0) - (a.rating || 0)
+          return (b.rating || 0) - (a.rating || 0);
         case "title":
-          return a.title.localeCompare(b.title)
+          return a.title.localeCompare(b.title);
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    setFilteredResources(filtered)
-  }, [searchTerm, typeFilter, categoryFilter, difficultyFilter, sortBy, resources])
+    setFilteredResources(filtered);
+  }, [searchTerm, typeFilter, categoryFilter, difficultyFilter, sortBy, resources]);
 
+  // Icons & colors
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "Article":
-        return <FileText className="h-5 w-5" />
+        return <FileText className="h-5 w-5" />;
       case "eBook":
-        return <BookOpen className="h-5 w-5" />
+        return <BookOpen className="h-5 w-5" />;
       case "Checklist":
-        return <CheckSquare className="h-5 w-5" />
+        return <CheckSquare className="h-5 w-5" />;
       case "Webinar":
-        return <Video className="h-5 w-5" />
+        return <Video className="h-5 w-5" />;
       case "Template":
-        return <FileText className="h-5 w-5" />
+        return <FileText className="h-5 w-5" />;
       case "Course":
-        return <BookOpen className="h-5 w-5" />
+        return <BookOpen className="h-5 w-5" />;
       case "Podcast":
-        return <Video className="h-5 w-5" />
+        return <Video className="h-5 w-5" />;
       default:
-        return <FileText className="h-5 w-5" />
+        return <FileText className="h-5 w-5" />;
     }
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case "Article":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "eBook":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "Checklist":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "Webinar":
-        return "bg-orange-100 text-orange-800"
+        return "bg-orange-100 text-orange-800";
       case "Template":
-        return "bg-pink-100 text-pink-800"
+        return "bg-pink-100 text-pink-800";
       case "Course":
-        return "bg-indigo-100 text-indigo-800"
+        return "bg-indigo-100 text-indigo-800";
       case "Podcast":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
+  // Actions
   const handleDownload = (resource: Resource) => {
     if (resource.fileUrl) {
-      const link = document.createElement("a")
-      link.href = resource.fileUrl
-      link.download = resource.title
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const link = document.createElement("a");
+      link.href = resource.fileUrl;
+      link.download = resource.title;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } else if (resource.externalUrl) {
-      window.open(resource.externalUrl, "_blank")
+      window.open(resource.externalUrl, "_blank");
     }
-  }
+  };
 
   const toggleBookmark = (resourceId: string) => {
-    const newBookmarked = bookmarkedResources.includes(resourceId)
+    const next = bookmarkedResources.includes(resourceId)
       ? bookmarkedResources.filter((id) => id !== resourceId)
-      : [...bookmarkedResources, resourceId]
-
-    setBookmarkedResources(newBookmarked)
-    localStorage.setItem("bookmarkedResources", JSON.stringify(newBookmarked))
-  }
+      : [...bookmarkedResources, resourceId];
+    setBookmarkedResources(next);
+    localStorage.setItem("bookmarkedResources", JSON.stringify(next));
+  };
 
   const toggleLike = (resourceId: string) => {
-    const newLiked = likedResources.includes(resourceId)
+    const next = likedResources.includes(resourceId)
       ? likedResources.filter((id) => id !== resourceId)
-      : [...likedResources, resourceId]
-
-    setLikedResources(newLiked)
-    localStorage.setItem("likedResources", JSON.stringify(newLiked))
-  }
+      : [...likedResources, resourceId];
+    setLikedResources(next);
+    localStorage.setItem("likedResources", JSON.stringify(next));
+  };
 
   const createCollection = () => {
-    if (!newCollectionName.trim()) return
-
+    if (!newCollectionName.trim()) return;
     const newCollection: Collection = {
       id: Date.now().toString(),
       name: newCollectionName,
@@ -284,38 +296,36 @@ export default function ResourceLibrary() {
       resources: [],
       isPublic: false,
       createdAt: new Date().toISOString(),
-    }
-
-    const updatedCollections = [...collections, newCollection]
-    setCollections(updatedCollections)
-    localStorage.setItem("resourceCollections", JSON.stringify(updatedCollections))
-
-    setNewCollectionName("")
-    setNewCollectionDescription("")
-  }
+    };
+    const updated = [...collections, newCollection];
+    setCollections(updated);
+    localStorage.setItem("resourceCollections", JSON.stringify(updated));
+    setNewCollectionName("");
+    setNewCollectionDescription("");
+  };
 
   const addToCollection = (collectionId: string, resourceId: string) => {
-    const updatedCollections = collections.map((collection) =>
-      collection.id === collectionId ? { ...collection, resources: [...collection.resources, resourceId] } : collection,
-    )
-    setCollections(updatedCollections)
-    localStorage.setItem("resourceCollections", JSON.stringify(updatedCollections))
-  }
+    const updated = collections.map((c) =>
+      c.id === collectionId ? { ...c, resources: [...c.resources, resourceId] } : c,
+    );
+    setCollections(updated);
+    localStorage.setItem("resourceCollections", JSON.stringify(updated));
+  };
 
-  const categories = [...new Set(resources.map((r) => r.category))]
-  const types = ["Article", "eBook", "Checklist", "Webinar", "Template", "Course", "Podcast"]
+  const categories = [...new Set(resources.map((r) => r.category))];
+  const types = ["Article", "eBook", "Checklist", "Webinar", "Template", "Course", "Podcast"];
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
             <p className="text-muted-foreground">Loading resource library...</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -328,54 +338,85 @@ export default function ResourceLibrary() {
         </p>
       </div>
 
+      {/* ===== Statistics Section (animated) ===== */}
       {resourceStats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Resources</p>
-                  <p className="text-2xl font-bold">{resourceStats.totalResources}</p>
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.5 }}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
+        >
+          {/* Total Resources */}
+          <motion.div variants={item} whileHover={{ y: -2 }}>
+            <Card className="border-l-4 border-l-primary/70">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Resources</p>
+                    <p className="text-2xl font-bold">
+                      <AnimatedCounter value={resourceStats.totalResources} />
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Download className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Downloads</p>
-                  <p className="text-2xl font-bold">{resourceStats.totalDownloads.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Total Downloads */}
+          <motion.div variants={item} whileHover={{ y: -2 }}>
+            <Card className="border-l-4 border-l-primary/70">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Download className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Downloads</p>
+                    <p className="text-2xl font-bold">
+                      <AnimatedCounter value={resourceStats.totalDownloads} />
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Star className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Avg Rating</p>
-                  <p className="text-2xl font-bold">{resourceStats.averageRating.toFixed(1)}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Avg Rating (1 decimal) */}
+          <motion.div variants={item} whileHover={{ y: -2 }}>
+            <Card className="border-l-4 border-l-primary/70">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Star className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Avg Rating</p>
+                    <p className="text-2xl font-bold">
+                      <AnimatedCounter value={resourceStats.averageRating || 0} decimals={1} />
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <FolderOpen className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">My Collections</p>
-                  <p className="text-2xl font-bold">{collections.length}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* My Collections */}
+          <motion.div variants={item} whileHover={{ y: -2 }}>
+            <Card className="border-l-4 border-l-primary/70">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <FolderOpen className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">My Collections</p>
+                    <p className="text-2xl font-bold">
+                      <AnimatedCounter value={collections.length} />
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
       )}
+      {/* ======================================== */}
 
       <Tabs defaultValue="all-resources" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -391,7 +432,7 @@ export default function ResourceLibrary() {
               <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 mb-4">
                 <div className="lg:col-span-2">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                       placeholder="Search resources, authors, tags..."
                       value={searchTerm}
@@ -453,21 +494,14 @@ export default function ResourceLibrary() {
 
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredResources.length} of {resources.length} resources
+                  Showing {new Intl.NumberFormat("en-US").format(filteredResources.length)} of{" "}
+                  {new Intl.NumberFormat("en-US").format(resources.length)} resources
                 </p>
                 <div className="flex items-center space-x-2">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                  >
+                  <Button variant={viewMode === "grid" ? "default" : "outline"} size="sm" onClick={() => setViewMode("grid")}>
                     <Grid className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                  >
+                  <Button variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")}>
                     <List className="h-4 w-4" />
                   </Button>
                 </div>
@@ -477,17 +511,21 @@ export default function ResourceLibrary() {
 
           {/* Featured Resources */}
           {resources.some((r) => r.featured) && (
-            <div className="mb-8">
-              <h2 className="font-heading text-2xl font-semibold mb-4 flex items-center space-x-2">
+            <div className="mb-8 md:mb-10 rounded-2xl border bg-muted/30 p-6 md:p-8">
+              <h2 className="font-heading text-2xl font-semibold mb-4 flex items-center gap-2">
                 <Star className="h-6 w-6 text-primary" />
                 <span>Featured Resources</span>
               </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {resources
                   .filter((r) => r.featured)
                   .slice(0, 3)
                   .map((resource) => (
-                    <Card key={resource.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-primary">
+                    <Card
+                      key={resource.id}
+                      className="border-l-4 border-l-primary hover:border-l-primary/70 bg-card/80 hover:bg-card/40 hover:backdrop-blur-md transition-colors transition-transform hover:shadow-xl hover:-translate-y-0.5"
+                    >
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex items-center space-x-2">
@@ -533,11 +571,7 @@ export default function ResourceLibrary() {
                               {resource.duration && <span> • {resource.duration}</span>}
                               {resource.format && <span> • {resource.format}</span>}
                             </div>
-                            <Button
-                              onClick={() => handleDownload(resource)}
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90"
-                            >
+                            <Button onClick={() => handleDownload(resource)} size="sm" className="bg-primary hover:bg-primary/90">
                               <Download className="h-4 w-4 mr-2" />
                               Access
                             </Button>
@@ -547,6 +581,16 @@ export default function ResourceLibrary() {
                     </Card>
                   ))}
               </div>
+            </div>
+          )}
+
+          {/* Divider between Featured and All */}
+          {resources.some((r) => r.featured) && (
+            <div className="relative my-8 md:my-10">
+              <Separator />
+              <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-background px-3 text-xs font-medium text-muted-foreground">
+                All resources
+              </span>
             </div>
           )}
 
@@ -561,13 +605,13 @@ export default function ResourceLibrary() {
                 </CardContent>
               </Card>
             ) : (
-              <div
-                className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}
-              >
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
                 {filteredResources.map((resource) => (
                   <Card
                     key={resource.id}
-                    className={`hover:shadow-lg transition-shadow ${viewMode === "list" ? "flex" : ""}`}
+                    className={`bg-card hover:bg-card/70 hover:backdrop-blur-sm transition-colors transition-transform hover:shadow-lg hover:-translate-y-0.5 ${
+                      viewMode === "list" ? "flex" : ""
+                    }`}
                   >
                     <CardHeader className={viewMode === "list" ? "flex-1" : ""}>
                       <div className="flex items-start justify-between">
@@ -588,14 +632,10 @@ export default function ResourceLibrary() {
                         </div>
                         <div className="flex items-center space-x-1">
                           <Button variant="ghost" size="sm" onClick={() => toggleBookmark(resource.id)}>
-                            <Bookmark
-                              className={`h-4 w-4 ${bookmarkedResources.includes(resource.id) ? "text-primary fill-current" : ""}`}
-                            />
+                            <Bookmark className={`h-4 w-4 ${bookmarkedResources.includes(resource.id) ? "text-primary fill-current" : ""}`} />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => toggleLike(resource.id)}>
-                            <Heart
-                              className={`h-4 w-4 ${likedResources.includes(resource.id) ? "text-red-500 fill-current" : ""}`}
-                            />
+                            <Heart className={`h-4 w-4 ${likedResources.includes(resource.id) ? "text-red-500 fill-current" : ""}`} />
                           </Button>
                           <Dialog>
                             <DialogTrigger asChild>
@@ -610,15 +650,10 @@ export default function ResourceLibrary() {
                               </DialogHeader>
                               <div className="space-y-4">
                                 {collections.map((collection) => (
-                                  <div
-                                    key={collection.id}
-                                    className="flex items-center justify-between p-3 border rounded-lg"
-                                  >
+                                  <div key={collection.id} className="flex items-center justify-between p-3 border rounded-lg">
                                     <div>
                                       <h4 className="font-medium">{collection.name}</h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        {collection.resources.length} resources
-                                      </p>
+                                      <p className="text-sm text-muted-foreground">{collection.resources.length} resources</p>
                                     </div>
                                     <Button
                                       size="sm"
@@ -651,7 +686,7 @@ export default function ResourceLibrary() {
                         <Separator orientation="vertical" className="h-4" />
                         <div className="flex items-center space-x-1">
                           <Eye className="h-3 w-3" />
-                          <span>{resource.views}</span>
+                          <span>{new Intl.NumberFormat("en-US").format(resource.views ?? 0)}</span>
                         </div>
                       </div>
                     </CardHeader>
@@ -669,7 +704,10 @@ export default function ResourceLibrary() {
                             {resource.size && <span>{resource.size}</span>}
                             {resource.duration && <span> • {resource.duration}</span>}
                             {resource.format && <span> • {resource.format}</span>}
-                            <span> • {resource.downloadCount} downloads</span>
+                            <span>
+                              {" "}
+                              • {new Intl.NumberFormat("en-US").format(resource.downloadCount ?? 0)} downloads
+                            </span>
                           </div>
                           <Button onClick={() => handleDownload(resource)} size="sm" variant="outline">
                             {resource.externalUrl ? (
@@ -695,7 +733,7 @@ export default function ResourceLibrary() {
         </TabsContent>
 
         <TabsContent value="bookmarks">
-          <Card>
+          <Card className="bg-card hover:bg-card/75 hover:backdrop-blur-sm transition-colors">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Bookmark className="h-5 w-5" />
@@ -713,9 +751,9 @@ export default function ResourceLibrary() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resources
-                    .filter((resource) => bookmarkedResources.includes(resource.id))
+                    .filter((r) => bookmarkedResources.includes(r.id))
                     .map((resource) => (
-                      <Card key={resource.id} className="hover:shadow-md transition-shadow">
+                      <Card key={resource.id} className="bg-card hover:bg-card/75 hover:backdrop-blur-sm transition-colors hover:shadow-md">
                         <CardContent className="p-4">
                           <div className="flex items-start space-x-3">
                             {getTypeIcon(resource.type)}
@@ -747,7 +785,7 @@ export default function ResourceLibrary() {
 
         <TabsContent value="collections">
           <div className="space-y-6">
-            <Card>
+            <Card className="bg-card hover:bg-card/75 hover:backdrop-blur-sm transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -801,7 +839,7 @@ export default function ResourceLibrary() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {collections.map((collection) => (
-                      <Card key={collection.id} className="hover:shadow-md transition-shadow">
+                      <Card key={collection.id} className="hover:shadow-md transition-shadow bg-card hover:bg-card/75 hover:backdrop-blur-sm transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center space-x-2">
@@ -815,7 +853,7 @@ export default function ResourceLibrary() {
                           <p className="text-sm text-muted-foreground mb-3">{collection.description}</p>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">
-                              {collection.resources.length} resources
+                              {new Intl.NumberFormat("en-US").format(collection.resources.length)} resources
                             </span>
                             <Badge variant="outline" className="text-xs">
                               {collection.isPublic ? "Public" : "Private"}
@@ -844,12 +882,18 @@ export default function ResourceLibrary() {
               <CardContent>
                 <div className="space-y-4">
                   {resources
+                    .slice()
                     .sort((a, b) => (b.views || 0) - (a.views || 0))
                     .slice(0, 10)
                     .map((resource, index) => (
-                      <div key={resource.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                      <div
+                        key={resource.id}
+                        className="flex items-center space-x-4 p-3 border rounded-lg bg-card hover:bg-card/70 hover:backdrop-blur-sm transition-colors transition-transform hover:-translate-y-0.5"
+                      >
                         <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
-                          <span className="text-sm font-bold text-primary">#{index + 1}</span>
+                          <span className="text-sm font-bold text-primary">
+                            #{new Intl.NumberFormat("en-US").format(index + 1)}
+                          </span>
                         </div>
                         {getTypeIcon(resource.type)}
                         <div className="flex-1">
@@ -859,11 +903,11 @@ export default function ResourceLibrary() {
                         <div className="text-right">
                           <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                             <Eye className="h-3 w-3" />
-                            <span>{resource.views}</span>
+                            <span>{new Intl.NumberFormat("en-US").format(resource.views ?? 0)}</span>
                           </div>
                           <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                             <Download className="h-3 w-3" />
-                            <span>{resource.downloadCount}</span>
+                            <span>{new Intl.NumberFormat("en-US").format(resource.downloadCount ?? 0)}</span>
                           </div>
                         </div>
                         <Button size="sm" variant="outline" onClick={() => handleDownload(resource)}>
@@ -878,5 +922,5 @@ export default function ResourceLibrary() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

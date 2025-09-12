@@ -6,11 +6,13 @@
     "type": "eBook",
     "category": "Career Development",
     "userType": ["Graduate", "Professional"],
-    "fileUrl": "/resources/resume-guide.pdf",
+    "fileUrl": "/downloads/resources/resume-guide.pdf",
     "size": "2.5 MB",
     "format": "PDF",
     "downloadCount": 1247,
-    "featured": true
+    "featured": true,
+    "views": 3450,
+    "likes": 230
   },
   {
     "id": "res_002",
@@ -19,11 +21,13 @@
     "type": "Checklist",
     "category": "Interview Skills",
     "userType": ["Graduate", "Professional"],
-    "fileUrl": "/resources/interview-checklist.pdf",
+    "fileUrl": "/downloads/resources/interview-checklist.pdf",
     "size": "850 KB",
     "format": "PDF",
     "downloadCount": 892,
-    "featured": true
+    "featured": true,
+    "views": 2890,
+    "likes": 185
   },
   {
     "id": "res_003",
@@ -32,11 +36,13 @@
     "type": "eBook",
     "category": "Education",
     "userType": ["Student", "Graduate"],
-    "fileUrl": "/resources/study-abroad-guide.pdf",
+    "fileUrl": "/downloads/resources/study-abroad-guide.pdf",
     "size": "3.2 MB",
     "format": "PDF",
     "downloadCount": 654,
-    "featured": true
+    "featured": true,
+    "views": 2100,
+    "likes": 142
   },
   {
     "id": "res_004",
@@ -45,9 +51,11 @@
     "type": "Article",
     "category": "Career Development",
     "userType": ["Professional"],
-    "externalUrl": "https://example.com/career-change-strategies",
+    "externalUrl": "https://hbr.org/2023/09/how-to-think-strategically-about-a-career-transition",
     "downloadCount": 423,
-    "featured": false
+    "featured": false,
+    "views": 1750,
+    "likes": 96
   },
   {
     "id": "res_005",
@@ -56,9 +64,11 @@
     "type": "Webinar",
     "category": "Professional Skills",
     "userType": ["Graduate", "Professional"],
-    "externalUrl": "https://example.com/networking-webinar",
+    "externalUrl": "https://alumni.umich.edu/career/webinars/archive/networking-for-introverts/",
     "downloadCount": 567,
-    "featured": false
+    "featured": false,
+    "views": 1980,
+    "likes": 120
   },
   {
     "id": "res_006",
@@ -67,11 +77,13 @@
     "type": "eBook",
     "category": "STEM Careers",
     "userType": ["Student", "Graduate"],
-    "fileUrl": "/resources/stem-careers.pdf",
+    "fileUrl": "/downloads/resources/stem-careers.pdf",
     "size": "4.1 MB",
     "format": "PDF",
     "downloadCount": 789,
-    "featured": false
+    "featured": false,
+    "views": 1560,
+    "likes": 110
   },
   {
     "id": "res_007",
@@ -80,9 +92,11 @@
     "type": "Article",
     "category": "Career Development",
     "userType": ["Graduate", "Professional"],
-    "externalUrl": "https://example.com/salary-negotiation",
+    "externalUrl": "https://hbr.org/2014/04/15-rules-for-negotiating-a-job-offer",
     "downloadCount": 334,
-    "featured": false
+    "featured": false,
+    "views": 1320,
+    "likes": 87
   },
   {
     "id": "res_008",
@@ -91,11 +105,13 @@
     "type": "Checklist",
     "category": "Professional Skills",
     "userType": ["Graduate", "Professional"],
-    "fileUrl": "/resources/linkedin-checklist.pdf",
+    "fileUrl": "/downloads/resources/linkedin-checklist.pdf",
     "size": "1.2 MB",
     "format": "PDF",
     "downloadCount": 1156,
-    "featured": false
+    "featured": false,
+    "views": 2780,
+    "likes": 190
   },
   {
     "id": "res_009",
@@ -104,9 +120,11 @@
     "type": "Webinar",
     "category": "Entrepreneurship",
     "userType": ["Graduate", "Professional"],
-    "externalUrl": "https://example.com/entrepreneurship-webinar",
+    "externalUrl": "https://www.startupschool.org/",
     "downloadCount": 445,
-    "featured": false
+    "featured": false,
+    "views": 1670,
+    "likes": 104
   },
   {
     "id": "res_010",
@@ -115,10 +133,68 @@
     "type": "Checklist",
     "category": "Education",
     "userType": ["Student"],
-    "fileUrl": "/resources/college-application-timeline.pdf",
+    "fileUrl": "/downloads/resources/college-application-timeline.pdf",
     "size": "950 KB",
     "format": "PDF",
     "downloadCount": 723,
-    "featured": false
+    "featured": false,
+    "views": 1920,
+    "likes": 133
+  },
+  {
+    "id": "res_011",
+    "title": "Resume Template",
+    "description": "Professional resume template in DOCX format.",
+    "type": "Template",
+    "category": "Career Development",
+    "userType": ["Graduate", "Professional"],
+    "fileUrl": "/downloads/resources/resume-template.docx",
+    "size": "95 KB",
+    "format": "DOCX",
+    "downloadCount": 0,
+    "featured": true,
+    "views": 2560,
+    "likes": 200
+  },
+  {
+    "id": "res_012",
+    "title": "Interview Tips",
+    "description": "Practical tips and strategies for acing your job interview.",
+    "type": "Checklist",
+    "category": "Interview Skills",
+    "userType": ["Graduate", "Professional"],
+    "fileUrl": "/downloads/resources/interview-tips.pdf",
+    "size": "220 KB",
+    "format": "PDF",
+    "downloadCount": 0,
+    "featured": true,
+    "views": 2430,
+    "likes": 175
+  },
+  {
+    "id": "res_tpl_001",
+    "title": "Resume Template (ATS-Friendly)",
+    "description": "Clean, ATS-safe DOCX template for quick editing.",
+    "type": "Template",
+    "category": "Career Development",
+    "userType": ["Student", "Graduate", "Professional"],
+    "fileUrl": "/downloads/resources/resume-template.docx",
+    "size": "64 KB",
+    "format": "DOCX",
+    "downloadCount": 0,
+    "featured": true
+  },
+  {
+    "id": "res_tip_001",
+    "title": "Effective Communication Skills",
+    "description": "A practical guide to developing strong verbal and non-verbal communication skills for workplace success.",
+    "type": "eBook",
+    "category": "Professional Skills",
+    "userType": ["Student","Graduate", "Professional"],
+    "fileUrl": "/downloads/resources/communication-skills.pdf",
+    "size": "1.8 MB",
+    "format": "PDF",
+    "downloadCount": 0,
+    "featured": true
   }
 ]

@@ -63,7 +63,6 @@ export default function AdmissionPage() {
 
   const { title, subtitle, streams: streamData, studyAbroadSteps, countries, downloads, externalResources } = data
 
-  // ستايل بطاقات التحميل (يعتمد على النص واسم الملف)
   const pickDownloadStyle = (label: string, file: string) => {
     const l = (label || "").toLowerCase()
     const f = (file || "").toLowerCase()
