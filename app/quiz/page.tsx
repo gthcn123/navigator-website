@@ -133,10 +133,9 @@ export default function QuizPage() {
 
   // Set current quiz when selection changes
   useEffect(() => {
-    if (selectedQuizId && quizzes.length > 0) {
-      const quiz = quizzes.find((q) => q.quizId === selectedQuizId)
-      setCurrentQuiz(quiz || null)
-    }
+    const quiz = quizzes.find((q) => q.quizId === selectedQuizId)
+    setCurrentQuiz(quiz || null)
+    setQuizStarted(false)
   }, [selectedQuizId, quizzes])
 
   const startQuiz = () => {
