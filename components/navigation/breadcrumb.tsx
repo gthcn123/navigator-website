@@ -29,25 +29,26 @@ export function BreadcrumbNav() {
   const pathname = usePathname()
   const pathSegments = pathname.split("/").filter(Boolean)
 
-  if (pathname === "/") {
-    return null // Don't show breadcrumb on home page
-  }
+  if (pathname === "/") return null
 
   return (
     <div
-      className="container mx-auto px-4 py-3 border-b"
-      style={{ backgroundColor: "#F4DBD8", borderColor: "#775144" }}
+      className="container mx-auto px-4 py-3 border-b animate-fade-in-up"
+      style={{
+        backgroundColor: "var(--color-background)",
+        borderColor: "var(--color-border)",
+      }}
     >
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="flex items-center space-x-1 font-body text-sm">
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
               <Link
                 href="/"
-                className="flex items-center space-x-1 text-[#775144] hover:text-[#2A0800] transition-colors"
+                className="flex items-center space-x-1 transition-transform duration-200 hover:scale-105 text-[var(--color-foreground)] hover:text-[var(--color-primary)]"
               >
-                <Home className="h-4 w-4 text-[#775144]" />
-                <span className="text-sm">Home</span>
+                <Home className="h-4 w-4" />
+                <span className="font-medium">Home</span>
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -59,20 +60,22 @@ export function BreadcrumbNav() {
               routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
 
             return (
-              <div key={segment} className="flex items-center">
+              <div key={segment} className="flex items-center space-x-1">
                 <BreadcrumbSeparator>
-                  <ChevronRight className="h-4 w-4 text-[#775144]" />
+                  <ChevronRight className="h-4 w-4 transition-colors duration-300 text-[var(--color-foreground)] hover:text-[var(--color-primary)]" />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   {isLast ? (
                     <BreadcrumbPage>
-                      <span className="text-[#2A0800] font-medium text-sm">{label}</span>
+                      <span className="font-medium text-[var(--color-primary)]">
+                        {label}
+                      </span>
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
                       <Link
                         href={href}
-                        className="text-sm text-[#775144] hover:text-[#2A0800] transition-colors"
+                        className="transition-transform duration-200 hover:scale-105 text-[var(--color-foreground)] hover:text-[var(--color-primary)] hover:underline"
                       >
                         {label}
                       </Link>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +31,9 @@ import {
   Share2,
   Target,
   Lightbulb,
+  Copy,
 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface Career {
   id: string
@@ -45,7 +47,7 @@ interface Career {
     max: number
     currency: string
   }
-  image: string
+  image?: string
   tags: string[]
   level: string[]
   growthRate: string
@@ -67,14 +69,16 @@ interface CareerAnalytics {
 }
 
 export default function CareerBankPage() {
+  const { toast } = useToast()
   const [careers, setCareers] = useState<Career[]>([])
   const [filteredCareers, setFilteredCareers] = useState<Career[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [selectedIndustry, setSelectedIndustry] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [selectedLocation, setSelectedLocation] = useState("all")
   const [selectedWorkType, setSelectedWorkType] = useState("all")
-  const [salaryRange, setSalaryRange] = useState([0, 200000])
+  const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 200000])
   const [sortBy, setSortBy] = useState("title")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [userType, setUserType] = useState("")
@@ -86,20 +90,45 @@ export default function CareerBankPage() {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [analytics, setAnalytics] = useState<CareerAnalytics | null>(null)
 
+  const searchRef = useRef<HTMLInputElement | null>(null)
+
+  // keyboard shortcut: press "/" to focus search
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement !== searchRef.current) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
+  // debounce searchTerm for performance
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300)
+    return () => clearTimeout(t)
+  }, [searchTerm])
+
   useEffect(() => {
     const loadCareers = async () => {
       try {
         const response = await fetch("/data/careers.json")
         const data = await response.json()
 
-        // Enhance careers with additional professional data
-        const enhancedCareers = data.map((career: Career) => ({
+        // Enhance careers with additional professional data & fallbacks
+        const enhancedCareers: Career[] = data.map((career: Career, idx: number) => ({
           ...career,
+          image:
+            career.image ||
+            `/placeholder.svg?height=300&width=400&query=${encodeURIComponent(career.title)}&idx=${idx}`,
           location: career.location || ["Remote", "On-site", "Hybrid"],
           workType: career.workType || ["Full-time", "Part-time", "Contract"],
           experience: career.experience || "Entry Level",
-          rating: career.rating || Math.random() * 2 + 3, // 3-5 rating
-          demandLevel: ["Low", "Medium", "High", "Very High"][Math.floor(Math.random() * 4)] as Career["demandLevel"],
+          rating: career.rating ?? +(Math.random() * 2 + 3).toFixed(1), // 3.0 - 5.0
+          demandLevel:
+            career.demandLevel ??
+            (Math.random() > 0.75 ? "Very High" : Math.random() > 0.5 ? "High" : Math.random() > 0.25 ? "Medium" : "Low"),
         }))
 
         setCareers(enhancedCareers)
@@ -107,8 +136,8 @@ export default function CareerBankPage() {
 
         // Generate analytics
         const analyticsData: CareerAnalytics = {
-          totalViews: Math.floor(Math.random() * 10000) + 5000,
-          bookmarkRate: Math.random() * 30 + 15,
+          totalViews: Math.floor(Math.random() * 20000) + 6000,
+          bookmarkRate: +(Math.random() * 30 + 10).toFixed(1),
           averageRating: 4.2,
           trendingCareers: enhancedCareers.slice(0, 5).map((c) => c.id),
           popularSkills: ["JavaScript", "Python", "Data Analysis", "Project Management", "Communication"],
@@ -124,11 +153,12 @@ export default function CareerBankPage() {
         setIsLoading(false)
       } catch (error) {
         console.error("Failed to load careers:", error)
+        toast({ title: "Failed to load careers", description: "Please try again later.", duration: 4000 })
         setIsLoading(false)
       }
     }
     loadCareers()
-  }, [])
+  }, [toast])
 
   // Load user data and preferences
   useEffect(() => {
@@ -170,27 +200,26 @@ export default function CareerBankPage() {
     return Array.from(skillSet).sort()
   }, [careers])
 
+  // Filtering + sorting (reactive)
   useEffect(() => {
     const filtered = careers.filter((career) => {
+      const q = debouncedSearch.toLowerCase()
       const matchesSearch =
-        career.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        career.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        career.skills.some((skill) => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+        !q ||
+        career.title.toLowerCase().includes(q) ||
+        career.description.toLowerCase().includes(q) ||
+        career.skills.some((skill) => skill.toLowerCase().includes(q))
 
       const matchesIndustry = selectedIndustry === "all" || career.industry === selectedIndustry
       const matchesLevel = selectedLevel === "all" || career.level.includes(selectedLevel)
-      const matchesLocation =
-        selectedLocation === "all" || (career.location && career.location.includes(selectedLocation))
-      const matchesWorkType =
-        selectedWorkType === "all" || (career.workType && career.workType.includes(selectedWorkType))
+      const matchesLocation = selectedLocation === "all" || (career.location && career.location.includes(selectedLocation))
+      const matchesWorkType = selectedWorkType === "all" || (career.workType && career.workType.includes(selectedWorkType))
       const matchesSalary = career.salaryRange.max >= salaryRange[0] && career.salaryRange.min <= salaryRange[1]
-      const matchesSkills = selectedSkills.length === 0 || selectedSkills.some((skill) => career.skills.includes(skill))
+      const matchesSkills = selectedSkills.length === 0 || selectedSkills.every((skill) => career.skills.includes(skill))
 
       const matchesUserType =
         !userType ||
-        career.level.includes(
-          userType === "student" ? "Student" : userType === "graduate" ? "Graduate" : "Professional",
-        )
+        career.level.includes(userType === "student" ? "Student" : userType === "graduate" ? "Graduate" : "Professional")
 
       return (
         matchesSearch &&
@@ -222,8 +251,8 @@ export default function CareerBankPage() {
           comparison = (a.rating || 0) - (b.rating || 0)
           break
         case "demand":
-          const demandOrder = { Low: 1, Medium: 2, High: 3, "Very High": 4 }
-          comparison = demandOrder[a.demandLevel || "Low"] - demandOrder[b.demandLevel || "Low"]
+          const demandOrder: Record<string, number> = { Low: 1, Medium: 2, High: 3, "Very High": 4 }
+          comparison = (demandOrder[a.demandLevel || "Low"] || 0) - (demandOrder[b.demandLevel || "Low"] || 0)
           break
         default:
           comparison = 0
@@ -235,7 +264,7 @@ export default function CareerBankPage() {
     setFilteredCareers(filtered)
   }, [
     careers,
-    searchTerm,
+    debouncedSearch,
     selectedIndustry,
     selectedLevel,
     selectedLocation,
@@ -247,22 +276,36 @@ export default function CareerBankPage() {
     userType,
   ])
 
-  const toggleBookmark = (careerId: string) => {
-    const newBookmarks = bookmarkedCareers.includes(careerId)
-      ? bookmarkedCareers.filter((id) => id !== careerId)
-      : [...bookmarkedCareers, careerId]
+  const toggleBookmark = useCallback(
+    (careerId: string) => {
+      const newBookmarks = bookmarkedCareers.includes(careerId)
+        ? bookmarkedCareers.filter((id) => id !== careerId)
+        : [careerId, ...bookmarkedCareers]
 
-    setBookmarkedCareers(newBookmarks)
-    localStorage.setItem("bookmarkedCareers", JSON.stringify(newBookmarks))
-  }
+      setBookmarkedCareers(newBookmarks)
+      localStorage.setItem("bookmarkedCareers", JSON.stringify(newBookmarks))
 
-  const markAsViewed = (careerId: string) => {
-    if (!viewedCareers.includes(careerId)) {
-      const newViewed = [...viewedCareers, careerId]
-      setViewedCareers(newViewed)
-      localStorage.setItem("viewedCareers", JSON.stringify(newViewed))
-    }
-  }
+      toast({
+        title: bookmarkedCareers.includes(careerId) ? "Bookmark removed" : "Bookmarked",
+        description: bookmarkedCareers.includes(careerId)
+          ? "Career removed from your bookmarks."
+          : "Career saved to your bookmarks.",
+        duration: 2500,
+      })
+    },
+    [bookmarkedCareers, toast],
+  )
+
+  const markAsViewed = useCallback(
+    (careerId: string) => {
+      if (!viewedCareers.includes(careerId)) {
+        const newViewed = [...viewedCareers, careerId]
+        setViewedCareers(newViewed)
+        localStorage.setItem("viewedCareers", JSON.stringify(newViewed))
+      }
+    },
+    [viewedCareers],
+  )
 
   const clearFilters = () => {
     setSearchTerm("")
@@ -275,6 +318,8 @@ export default function CareerBankPage() {
     setSortOrder("asc")
     setSelectedSkills([])
     setShowAdvancedFilters(false)
+    setDebouncedSearch("")
+    toast({ title: "Filters cleared", duration: 1600 })
   }
 
   const exportResults = () => {
@@ -282,24 +327,26 @@ export default function CareerBankPage() {
       ["Title", "Industry", "Salary Min", "Salary Max", "Skills", "Education", "Growth Rate"].join(","),
       ...filteredCareers.map((career) =>
         [
-          career.title,
-          career.industry,
+          `"${career.title.replace(/"/g, '""')}"`,
+          `"${career.industry.replace(/"/g, '""')}"`,
           career.salaryRange.min,
           career.salaryRange.max,
-          career.skills.join("; "),
-          career.education.join("; "),
-          career.growthRate,
+          `"${career.skills.join("; ").replace(/"/g, '""')}"`,
+          `"${career.education.join("; ").replace(/"/g, '""')}"`,
+          `"${career.growthRate.replace(/"/g, '""')}"`,
         ].join(","),
       ),
     ].join("\n")
 
-    const blob = new Blob([csvContent], { type: "text/csv" })
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "career-search-results.csv"
+    a.download = `career-search-results-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
+
+    toast({ title: "Export started", description: "CSV file is downloading.", duration: 2500 })
   }
 
   const shareResults = async () => {
@@ -310,98 +357,41 @@ export default function CareerBankPage() {
           text: `Found ${filteredCareers.length} career opportunities`,
           url: window.location.href,
         })
+        toast({ title: "Shared", duration: 2000 })
       } catch (error) {
         console.log("Error sharing:", error)
+        toast({ title: "Share failed", description: "Unable to share on this device." })
       }
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      // Could add toast notification here
+      await navigator.clipboard.writeText(window.location.href)
+      toast({ title: "Link copied", description: "Page URL copied to clipboard." })
+    }
+  }
+
+  const copyCareerLink = async (careerId: string) => {
+    const url = `${window.location.origin}/career-bank/${careerId}`
+    await navigator.clipboard.writeText(url)
+    toast({ title: "Link copied", description: "Career link copied to clipboard." })
+  }
+
+  // small util to map demand to color
+  const demandColor = (d?: Career["demandLevel"]) => {
+    switch (d) {
+      case "Very High":
+        return "bg-green-600 text-white"
+      case "High":
+        return "bg-emerald-500 text-white"
+      case "Medium":
+        return "bg-yellow-500 text-black"
+      case "Low":
+      default:
+        return "bg-zinc-500 text-white"
     }
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8" style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}>
-        <style jsx global>{`
-          :root{
-            /* Dark palette applied */
-            --cozy-bg: #190019;               /* Main Background */
-            --cozy-text: #FBE4D8;             /* Primary Text / Light Backgrounds */
-            --cozy-muted: #854F6C;            /* Subheadings / Secondary Text */
-            --cozy-btn-primary: #DFB6B2;      /* Buttons / Cards / Accents */
-            --cozy-btn-primary-hover: #d1aead;/* slightly darker/lighter hover (tweak if needed) */
-            --cozy-btn-primary-text-dark: #190019; /* Dark text to sit on accent backgrounds */
-            --cozy-btn-primary-text-light: #190019; /* using dark text on accent for contrast */
-            --cozy-btn-secondary: #522B5B;    /* Secondary accents - use sidebar color */
-            --cozy-btn-secondary-hover: #4a254f;
-            --cozy-navbar: #2B124C;           /* Header & Footer */
-            --cozy-footer: #2B124C;
-            --cozy-card-bg: #DFB6B2;          /* Card Background (accent) */
-            --cozy-card-text: #190019;        /* Card Text (dark) */
-            --cozy-heading: #DFB6B2;          /* Headings (accent) */
-            --cozy-heading-alt: #854F6C;      /* Alternate heading / hover */
-            --cozy-section: #522B5B;          /* Sidebars / Sections */
-          }
-
-          body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
-
-          /* map common utility classes used by shadcn/ui / Tailwind in this page */
-          .text-muted-foreground { color: var(--cozy-muted) !important; }
-          .text-primary { color: var(--cozy-heading) !important; }
-          .text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
-
-          .bg-primary { background-color: var(--cozy-btn-primary) !important; }
-          .bg-muted { background-color: var(--cozy-card-bg) !important; }
-
-          /* group-hover overrides */
-          .group:hover .group-hover\\:text-primary { color: var(--cozy-heading) !important; }
-          .group:hover .group-hover\\:bg-primary { background-color: var(--cozy-btn-primary) !important; }
-          .group:hover .group-hover\\:text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
-
-          /* viewed state that used bg-muted/20 in Tailwind */
-          [class*="bg-muted"] { background-color: var(--cozy-card-bg) !important; }
-
-          /* Card styling */
-          .card-cozy {
-            background: var(--cozy-card-bg) !important;
-            color: var(--cozy-card-text) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
-            border: 1px solid rgba(255,255,255,0.03);
-          }
-
-          /* Buttons (best-effort override) */
-          .btn-cozy-primary {
-            background: var(--cozy-btn-primary) !important;
-            color: var(--cozy-btn-primary-text-dark) !important;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-          }
-          .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-dark) !important; }
-
-          .btn-cozy-secondary {
-            background: var(--cozy-btn-secondary) !important;
-            color: var(--cozy-text) !important;
-            font-weight: 600;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.02);
-          }
-          .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
-
-          /* Headings */
-          .cozy-heading { color: var(--cozy-heading) !important; }
-
-          /* Links */
-          a { color: var(--cozy-heading) !important; }
-          a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
-
-          /* Badge tweaks */
-          .badge { border-radius: 8px !important; background: transparent; color: var(--cozy-text) !important; border: 1px solid rgba(255,255,255,0.04); }
-
-        `}</style>
-
+      <div className="container mx-auto px-4 py-8" role="status" aria-live="polite">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
@@ -413,107 +403,23 @@ export default function CareerBankPage() {
   }
 
   return (
-    <div
-      className="container mx-auto px-4 py-8"
-      style={{ background: "var(--cozy-bg)", color: "var(--cozy-text)" }}
-    >
-      {/* Global CSS variables + overrides (dark palette) */}
-      <style jsx global>{`
-        :root{
-          /* Dark palette applied */
-          --cozy-bg: #190019;               /* Main Background */
-          --cozy-text: #FBE4D8;             /* Primary Text / Light Backgrounds */
-          --cozy-muted: #854F6C;            /* Subheadings / Secondary Text */
-          --cozy-btn-primary: #DFB6B2;      /* Buttons / Cards / Accents */
-          --cozy-btn-primary-hover: #d1aead;
-          --cozy-btn-primary-text-dark: #190019;
-          --cozy-btn-primary-text-light: #190019;
-          --cozy-btn-secondary: #522B5B;    /* Secondary accents / sections */
-          --cozy-btn-secondary-hover: #4a254f;
-          --cozy-navbar: #2B124C;           /* Header & Footer */
-          --cozy-footer: #2B124C;
-          --cozy-card-bg: #DFB6B2;          /* Card Background (accent) */
-          --cozy-card-text: #190019;        /* Card Text (dark) */
-          --cozy-heading: #DFB6B2;          /* Headings (accent) */
-          --cozy-heading-alt: #854F6C;      /* Alternate heading / hover */
-          --cozy-section: #522B5B;          /* Sidebars / Sections */
-        }
-
-        body { background: var(--cozy-bg) !important; color: var(--cozy-text) !important; }
-
-        /* map common utility classes used by shadcn/ui / Tailwind in this page */
-        .text-muted-foreground { color: var(--cozy-muted) !important; }
-        .text-primary { color: var(--cozy-heading) !important; }
-        .text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
-
-        .bg-primary { background-color: var(--cozy-btn-primary) !important; }
-        .bg-muted { background-color: var(--cozy-card-bg) !important; }
-
-        /* group-hover overrides */
-        .group:hover .group-hover\\:text-primary { color: var(--cozy-heading) !important; }
-        .group:hover .group-hover\\:bg-primary { background-color: var(--cozy-btn-primary) !important; }
-        .group:hover .group-hover\\:text-primary-foreground { color: var(--cozy-btn-primary-text-light) !important; }
-
-        /* viewed state that used bg-muted/20 in Tailwind */
-        [class*="bg-muted"] { background-color: var(--cozy-card-bg) !important; }
-
-        /* Card styling */
-        .card-cozy {
-          background: var(--cozy-card-bg) !important;
-          color: var(--cozy-card-text) !important;
-          border-radius: 12px !important;
-          box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
-          border: 1px solid rgba(255,255,255,0.03);
-        }
-
-        /* Buttons (best-effort override) */
-        .btn-cozy-primary {
-          background: var(--cozy-btn-primary) !important;
-          color: var(--cozy-btn-primary-text-dark) !important;
-          font-weight: 600;
-          border-radius: 10px;
-          transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
-          box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        }
-        .btn-cozy-primary:hover { background: var(--cozy-btn-primary-hover) !important; transform: translateY(-2px); color: var(--cozy-btn-primary-text-dark) !important; }
-
-        .btn-cozy-secondary {
-          background: var(--cozy-btn-secondary) !important;
-          color: var(--cozy-text) !important;
-          font-weight: 600;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.02);
-        }
-        .btn-cozy-secondary:hover { background: var(--cozy-btn-secondary-hover) !important; transform: translateY(-2px); }
-
-        /* Headings */
-        .cozy-heading { color: var(--cozy-heading) !important; }
-
-        /* Links */
-        a { color: var(--cozy-heading) !important; }
-        a:hover { color: var(--cozy-heading-alt) !important; text-decoration: underline; }
-
-        /* Badge tweaks */
-        .badge { border-radius: 8px !important; background: transparent; color: var(--cozy-text) !important; border: 1px solid rgba(255,255,255,0.04); }
-
-      `}</style>
-
+    <div className="container mx-auto px-4 py-8">
+      {/* Page header */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div>
-            <h1 className="font-heading text-3xl font-bold mb-2 cozy-heading" style={{ color: "var(--cozy-heading)" }}>
-              Career Bank
-            </h1>
+            <h1 className="font-heading text-3xl font-bold mb-2">Career Bank</h1>
             <p className="text-muted-foreground text-lg">
-              Explore {careers.length} career opportunities with advanced analytics and insights
+              Explore <span className="font-medium">{careers.length}</span> career opportunities with advanced analytics
             </p>
           </div>
+
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={exportResults} className="btn-cozy-secondary">
+            <Button variant="outline" size="sm" onClick={exportResults}>
               <Download className="h-4 w-4 mr-2" />
               Export Results
             </Button>
-            <Button variant="outline" size="sm" onClick={shareResults} className="btn-cozy-secondary">
+            <Button variant="outline" size="sm" onClick={shareResults}>
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
@@ -523,7 +429,7 @@ export default function CareerBankPage() {
         {/* Analytics Dashboard */}
         {analytics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="card-cozy">
+            <Card className="bg-card/80">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Eye className="h-4 w-4 text-primary" />
@@ -534,7 +440,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="card-cozy">
+            <Card className="bg-card/80">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Bookmark className="h-4 w-4 text-primary" />
@@ -545,7 +451,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="card-cozy">
+            <Card className="bg-card/80">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-primary" />
@@ -556,7 +462,7 @@ export default function CareerBankPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="card-cozy">
+            <Card className="bg-card/80">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
@@ -581,21 +487,22 @@ export default function CareerBankPage() {
         <TabsContent value="explore" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-1">
-              <Card className="sticky top-24 card-cozy">
+              <Card className="sticky top-24">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Filter className="h-5 w-5" />
                     <span>Advanced Filters</span>
                   </CardTitle>
                   <div className="flex space-x-2">
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="btn-cozy-secondary w-fit">
+                    <Button variant="ghost" size="sm" onClick={clearFilters}>
                       Clear All
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)} className="btn-cozy-secondary">
+                    <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
                       {showAdvancedFilters ? "Basic" : "Advanced"}
                     </Button>
                   </div>
                 </CardHeader>
+
                 <CardContent className="space-y-6">
                   {/* Search */}
                   <div className="space-y-2">
@@ -604,12 +511,15 @@ export default function CareerBankPage() {
                       <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="search"
+                        ref={searchRef}
                         placeholder="Search by title, skills..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
+                        aria-label="Search careers"
                       />
                     </div>
+                    <p className="text-xs text-muted-foreground">Tip: press "/" to focus the search box.</p>
                   </div>
 
                   {/* Industry Filter */}
@@ -690,7 +600,7 @@ export default function CareerBankPage() {
                       <div className="space-y-2">
                         <Label>Required Skills</Label>
                         <div className="max-h-32 overflow-y-auto space-y-2">
-                          {allSkills.slice(0, 10).map((skill) => (
+                          {allSkills.slice(0, 12).map((skill) => (
                             <div key={skill} className="flex items-center space-x-2">
                               <Checkbox
                                 id={skill}
@@ -719,7 +629,7 @@ export default function CareerBankPage() {
                     <div className="px-2">
                       <Slider
                         value={salaryRange}
-                        onValueChange={setSalaryRange}
+                        onValueChange={(v) => setSalaryRange(v as [number, number])}
                         max={200000}
                         min={0}
                         step={5000}
@@ -740,14 +650,13 @@ export default function CareerBankPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <span>
-                    Showing {filteredCareers.length} of {careers.length} careers
+                    Showing <span className="font-medium">{filteredCareers.length}</span> of {careers.length} careers
                   </span>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant={viewMode === "grid" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("grid")}
-                      className={viewMode === "grid" ? "btn-cozy-primary" : "btn-cozy-secondary"}
                     >
                       Grid
                     </Button>
@@ -755,7 +664,6 @@ export default function CareerBankPage() {
                       variant={viewMode === "list" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("list")}
-                      className={viewMode === "list" ? "btn-cozy-primary" : "btn-cozy-secondary"}
                     >
                       List
                     </Button>
@@ -785,128 +693,154 @@ export default function CareerBankPage() {
 
               {/* Career Cards Grid/List */}
               {filteredCareers.length === 0 ? (
-                <Card className="p-8 text-center card-cozy">
+                <Card className="p-8 text-center">
                   <CardContent>
                     <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="font-semibold text-lg mb-2">No careers found</h3>
                     <p className="text-muted-foreground mb-4">
                       Try adjusting your filters or search terms to find more opportunities.
                     </p>
-                    <Button onClick={clearFilters} className="btn-cozy-secondary">Clear Filters</Button>
+                    <Button onClick={clearFilters}>Clear Filters</Button>
                   </CardContent>
                 </Card>
               ) : (
                 <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
-                  {filteredCareers.map((career) => (
-                    <Card
-                      key={career.id}
-                      className={`card-cozy group hover:shadow-lg transition-all duration-200 ${
-                        viewedCareers.includes(career.id) ? "bg-muted/20" : ""
-                      } ${viewMode === "list" ? "flex" : ""}`}
-                    >
-                      <CardHeader className={`${viewMode === "list" ? "flex-1" : ""} pb-3`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors">
-                              {career.title}
-                            </CardTitle>
-                            <CardDescription className="flex items-center space-x-2 flex-wrap gap-1">
-                              <Badge variant="secondary" className="text-xs">
-                                {career.industry}
-                              </Badge>
-                              {career.demandLevel && (
-                                <Badge
-                                  variant={career.demandLevel === "Very High" ? "default" : "outline"}
-                                  className="text-xs"
+                  {filteredCareers.map((career) => {
+                    const salaryMax = Math.max(...careers.map((c) => c.salaryRange.max), 1)
+                    const salaryPct = Math.min(100, Math.round((career.salaryRange.max / salaryMax) * 100))
+                    return (
+                      <Card
+                        key={career.id}
+                        className={`group hover:shadow-lg transition-all duration-200 ${viewMode === "list" ? "flex" : ""}`}
+                        aria-labelledby={`career-${career.id}-title`}
+                      >
+                        <CardHeader className={`${viewMode === "list" ? "flex-1" : ""} pb-3`}>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 flex-1 min-w-0">
+                              <img
+                                src={career.image}
+                                alt={`${career.title} thumbnail`}
+                                className="w-20 h-20 rounded-md object-cover flex-shrink-0 shadow-sm"
+                                loading="lazy"
+                                width={80}
+                                height={80}
+                              />
+                              <div className="min-w-0">
+                                <CardTitle id={`career-${career.id}-title`} className="text-lg mb-1 truncate">
+                                  {career.title}
+                                </CardTitle>
+                                <CardDescription className="flex items-center space-x-2 flex-wrap gap-1 text-sm">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {career.industry}
+                                  </Badge>
+                                  <span className={`text-xs px-2 py-0.5 rounded ${demandColor(career.demandLevel)}`}>
+                                    {career.demandLevel} Demand
+                                  </span>
+                                  {viewedCareers.includes(career.id) && (
+                                    <Badge variant="outline" className="text-xs">
+                                      <Eye className="h-3 w-3 mr-1" />
+                                      Viewed
+                                    </Badge>
+                                  )}
+                                </CardDescription>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleBookmark(career.id)}
+                                  aria-pressed={bookmarkedCareers.includes(career.id)}
+                                  aria-label={bookmarkedCareers.includes(career.id) ? "Remove bookmark" : "Add bookmark"}
                                 >
-                                  {career.demandLevel} Demand
-                                </Badge>
-                              )}
-                              {viewedCareers.includes(career.id) && (
-                                <Badge variant="outline" className="text-xs">
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Viewed
-                                </Badge>
-                              )}
-                            </CardDescription>
+                                  {bookmarkedCareers.includes(career.id) ? (
+                                    <BookmarkCheck className="h-4 w-4 text-primary" />
+                                  ) : (
+                                    <Bookmark className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => copyCareerLink(career.id)} aria-label="Copy career link">
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                <span className="flex items-center gap-1">
+                                  <Star className="h-4 w-4 text-yellow-400" />
+                                  <strong>{career.rating?.toFixed(1)}</strong>
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleBookmark(career.id)}
-                            className="shrink-0"
-                          >
-                            {bookmarkedCareers.includes(career.id) ? (
-                              <BookmarkCheck className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Bookmark className="h-4 w-4" />
+                        </CardHeader>
+
+                        <CardContent className={`${viewMode === "list" ? "flex-1" : ""} space-y-4`}>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{career.description}</p>
+
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex items-center space-x-2">
+                              <DollarSign className="h-4 w-4 text-muted-foreground" />
+                              <span>
+                                ${career.salaryRange.min.toLocaleString()} - ${career.salaryRange.max.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                              <span>Growth: {career.growthRate}</span>
+                            </div>
+                            {career.location && (
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <span>{career.location[0]}</span>
+                              </div>
                             )}
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className={`${viewMode === "list" ? "flex-1" : ""} space-y-4`}>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{career.description}</p>
-
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              ${career.salaryRange.min.toLocaleString()} - ${career.salaryRange.max.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            <span>Growth: {career.growthRate}</span>
-                          </div>
-                          {career.rating && (
                             <div className="flex items-center space-x-2">
-                              <Star className="h-4 w-4 text-yellow-500" />
-                              <span>{career.rating.toFixed(1)}</span>
+                              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                              <span>{career.level.join(", ")}</span>
                             </div>
-                          )}
-                          {career.location && (
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span>{career.location[0]}</span>
-                            </div>
-                          )}
-                        </div>
+                          </div>
 
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap gap-1">
-                            {career.skills.slice(0, 3).map((skill) => (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            {career.skills.slice(0, 4).map((skill) => (
                               <Badge key={skill} variant="outline" className="text-xs">
                                 {skill}
                               </Badge>
                             ))}
-                            {career.skills.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{career.skills.length - 3} more
-                              </Badge>
-                            )}
+                            {career.skills.length > 4 && <Badge variant="outline" className="text-xs">+{career.skills.length - 4} more</Badge>}
                           </div>
-                        </div>
 
-                        <Separator />
-
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                            <GraduationCap className="h-3 w-3" />
-                            <span>{career.level.join(", ")}</span>
+                          {/* mini salary bar & actions */}
+                          <div>
+                            <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                              <span>Salary position</span>
+                              <span>${career.salaryRange.max.toLocaleString()}</span>
+                            </div>
+                            <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-primary transition-all" style={{ width: `${salaryPct}%` }} />
+                            </div>
                           </div>
-                          <Link href={`/career-bank/${career.id}`}>
-                            <Button
-                              size="sm"
-                              onClick={() => markAsViewed(career.id)}
-                              className="btn-cozy-primary group-hover:bg-primary group-hover:text-primary-foreground"
-                            >
-                              Learn More
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+
+                          <Separator />
+
+                          <div className="flex justify-between items-center">
+                            <div className="text-xs text-muted-foreground flex items-center gap-2">
+                              <GraduationCap className="h-4 w-4" />
+                              <span>{career.experience}</span>
+                            </div>
+                            <Link href={`/career-bank/${career.id}`}>
+                              <Button
+                                size="sm"
+                                onClick={() => markAsViewed(career.id)}
+                              >
+                                Learn More
+                              </Button>
+                            </Link>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -915,7 +849,7 @@ export default function CareerBankPage() {
 
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="card-cozy">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <BarChart3 className="h-5 w-5" />
@@ -931,7 +865,7 @@ export default function CareerBankPage() {
                           <span>{industry}</span>
                           <span>${salary.toLocaleString()}</span>
                         </div>
-                        <Progress value={(salary / 100000) * 100} className="h-2" />
+                        <Progress value={Math.min(100, Math.round((salary / 120000) * 100))} className="h-2" />
                       </div>
                     ))}
                   </div>
@@ -939,7 +873,7 @@ export default function CareerBankPage() {
               </CardContent>
             </Card>
 
-            <Card className="card-cozy">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Lightbulb className="h-5 w-5" />
@@ -962,26 +896,30 @@ export default function CareerBankPage() {
         </TabsContent>
 
         <TabsContent value="recommendations" className="space-y-6">
-          <Card className="card-cozy">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Target className="h-5 w-5" />
                 <span>AI-Powered Career Recommendations</span>
               </CardTitle>
-              <CardDescription>
-                Based on your profile and browsing history, here are personalized career suggestions
-              </CardDescription>
+              <CardDescription>Based on your profile and browsing history, here are personalized career suggestions</CardDescription>
             </CardHeader>
+
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredCareers.slice(0, 4).map((career) => (
-                  <Card key={career.id} className="hover:shadow-md transition-all card-cozy">
+                {filteredCareers.slice(0, 6).map((career) => (
+                  <Card key={career.id} className="hover:shadow-md transition-all">
                     <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2">{career.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{career.description.substring(0, 100)}...</p>
-                      <div className="flex justify-between items-center">
-                        <Badge variant="secondary">{career.industry}</Badge>
-                        <span className="text-sm font-medium">${career.salaryRange.max.toLocaleString()}</span>
+                      <div className="flex items-start gap-4">
+                        <img src={career.image} alt={career.title} className="w-16 h-12 object-cover rounded-md" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold mb-1">{career.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{career.description}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="secondary">{career.industry}</Badge>
+                            <span className="text-sm font-medium">${career.salaryRange.max.toLocaleString()}</span>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

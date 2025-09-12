@@ -12,9 +12,8 @@ function Avatar({
     <AvatarPrimitive.Root
       data-slot="avatar"
       className={cn(
-        // الحجم الافتراضي دائماً دائري مع ظل خفيف
-        'relative flex size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-border shadow-sm',
-        'transition-transform hover:scale-105',
+        'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-border shadow-sm',
+        'transition-transform hover:scale-105 motion-safe:duration-300',
         className,
       )}
       {...props}
@@ -30,7 +29,8 @@ function AvatarImage({
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn(
-        'aspect-square size-full object-cover',
+        'aspect-square h-full w-full object-cover',
+        'transition-transform duration-300 ease-in-out',
         className,
       )}
       {...props}
@@ -48,9 +48,9 @@ function AvatarFallback({
       data-slot="avatar-fallback"
       delayMs={300}
       className={cn(
-        // fallback بخلفية هادئة + نص أنيق
-        'flex size-full items-center justify-center rounded-full',
+        'flex h-full w-full items-center justify-center rounded-full',
         'bg-muted text-foreground/70 text-sm font-medium select-none',
+        'animate-pulse dark:bg-muted/50',
         className,
       )}
       {...props}
