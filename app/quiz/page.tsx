@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -29,11 +29,8 @@ import {
   Award,
   Lightbulb,
   Calendar,
-  Copy,
-  Printer,
 } from "lucide-react"
 import Link from "next/link"
-import { useToast } from "@/hooks/use-toast"
 
 interface QuizChoice {
   id: string
@@ -74,11 +71,7 @@ interface QuizAnalytics {
   personalityDistribution: { [key: string]: number }
 }
 
-const SAVED_QUIZ_KEY = "savedQuizProgress_v1"
-const QUIZ_HISTORY_KEY = "quizHistory_v1"
-
 export default function QuizPage() {
-  const { toast } = useToast()
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [selectedQuizId, setSelectedQuizId] = useState("")
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null)
@@ -94,217 +87,128 @@ export default function QuizPage() {
   const [timeSpent, setTimeSpent] = useState(0)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [personalityInsights, setPersonalityInsights] = useState<any>(null)
-  const [hasSavedProgress, setHasSavedProgress] = useState(false)
 
-  const timerRef = useRef<number | null>(null)
-
-  // Load quiz data + analytics + saved history
+  // Load quiz data
   useEffect(() => {
-    const load = async () => {
+    const loadQuizzes = async () => {
       try {
-        const res = await fetch("/data/quizzes.json")
-        const data = await res.json()
+        const response = await fetch("/data/quizzes.json")
+        const data = await response.json()
         setQuizzes(data)
-      } catch (err) {
-        console.error("Failed to load quizzes:", err)
-        toast({ title: "Failed to load quizzes", description: "Please try again later." })
-      } finally {
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Failed to load quizzes:", error)
         setIsLoading(false)
       }
     }
-    load()
+    loadQuizzes()
 
-    // generate synthetic analytics dashboard (placeholder)
-    setAnalytics({
-      totalAttempts: Math.floor(Math.random() * 5000) + 2000,
-      averageScore: Math.random() * 20 + 60,
-      completionRate: Math.random() * 20 + 75,
-      popularInterests: ["Technology", "Healthcare", "Creative Arts", "Business", "Science"],
-      timeSpent: Math.floor(Math.random() * 300) + 180,
-      accuracyTrend: Array.from({ length: 7 }, () => Math.random() * 20 + 70),
-      personalityDistribution: {
-        Analytical: 25,
-        Creative: 30,
-        Social: 20,
-        Practical: 15,
-        Investigative: 10,
-      },
-    })
-
-    const history = localStorage.getItem(QUIZ_HISTORY_KEY)
-    if (history) setQuizHistory(JSON.parse(history))
-
-    const saved = localStorage.getItem(SAVED_QUIZ_KEY)
-    setHasSavedProgress(Boolean(saved))
-  }, [toast])
-
-  // When selectedQuizId changes, set the currentQuiz
-  useEffect(() => {
-    if (!selectedQuizId) {
-      setCurrentQuiz(null)
-      return
+    const generateAnalytics = () => {
+      const analyticsData: QuizAnalytics = {
+        totalAttempts: Math.floor(Math.random() * 5000) + 2000,
+        averageScore: Math.random() * 20 + 60, // 60-80% average
+        completionRate: Math.random() * 20 + 75, // 75-95% completion
+        popularInterests: ["Technology", "Healthcare", "Creative Arts", "Business", "Science"],
+        timeSpent: Math.floor(Math.random() * 300) + 180, // 3-8 minutes
+        accuracyTrend: Array.from({ length: 7 }, () => Math.random() * 20 + 70),
+        personalityDistribution: {
+          Analytical: 25,
+          Creative: 30,
+          Social: 20,
+          Practical: 15,
+          Investigative: 10,
+        },
+      }
+      setAnalytics(analyticsData)
     }
-    const q = quizzes.find((x) => x.quizId === selectedQuizId) || null
-    setCurrentQuiz(q)
+
+    generateAnalytics()
+
+    // Load quiz history from localStorage
+    const history = localStorage.getItem("quizHistory")
+    if (history) {
+      setQuizHistory(JSON.parse(history))
+    }
+  }, [])
+
+  // Set current quiz when selection changes
+  useEffect(() => {
+    if (selectedQuizId && quizzes.length > 0) {
+      const quiz = quizzes.find((q) => q.quizId === selectedQuizId)
+      setCurrentQuiz(quiz || null)
+    }
   }, [selectedQuizId, quizzes])
 
-  // autosave progress when answers change while quiz started
-  useEffect(() => {
-    if (!quizStarted) return
-    const payload = {
-      quizId: currentQuiz?.quizId,
-      currentQuestionIndex,
-      answers,
-      startTime: startTime?.toISOString() ?? null,
-      timestamp: new Date().toISOString(),
+  const startQuiz = () => {
+    if (currentQuiz) {
+      setQuizStarted(true)
+      setCurrentQuestionIndex(0)
+      setAnswers({})
+      setQuizCompleted(false)
+      setResults(null)
+      setTotalScore(0)
+      setStartTime(new Date())
+      setTimeSpent(0)
     }
-    try {
-      localStorage.setItem(SAVED_QUIZ_KEY, JSON.stringify(payload))
-      setHasSavedProgress(true)
-    } catch {
-      // ignore
+  }
+
+  const handleAnswerChange = (questionId: string, choiceId: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: choiceId,
+    }))
+  }
+
+  const nextQuestion = () => {
+    if (currentQuiz && currentQuestionIndex < currentQuiz.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1)
     }
-  }, [answers, currentQuestionIndex, quizStarted, currentQuiz, startTime])
+  }
 
-  // keyboard navigation: left/right for prev/next, enter to advance on answer
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!quizStarted || quizCompleted) return
-      if (e.key === "ArrowLeft") {
-        e.preventDefault()
-        setCurrentQuestionIndex((i) => Math.max(0, i - 1))
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault()
-        setCurrentQuestionIndex((i) => {
-          if (!currentQuiz) return i
-          return Math.min(currentQuiz.questions.length - 1, i + 1)
-        })
-      } else if (e.key === "Enter") {
-        // if current question answered, advance
-        const currentQ = currentQuiz?.questions[currentQuestionIndex]
-        if (currentQ && answers[currentQ.id]) {
-          if (currentQuestionIndex < (currentQuiz?.questions.length ?? 1) - 1) {
-            setCurrentQuestionIndex((i) => i + 1)
-          } else {
-            calculateResults()
-          }
-        }
-      }
+  const previousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1)
     }
-    window.addEventListener("keydown", handler)
-    return () => window.removeEventListener("keydown", handler)
-  }, [quizStarted, quizCompleted, currentQuiz, currentQuestionIndex, answers])
+  }
 
-  // timer for timeSpent while quiz is active
-  useEffect(() => {
-    if (!quizStarted || quizCompleted) {
-      if (timerRef.current) {
-        window.clearInterval(timerRef.current)
-        timerRef.current = null
-      }
-      return
-    }
-    timerRef.current = window.setInterval(() => {
-      setTimeSpent((t) => t + 1)
-    }, 1000)
-    return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }, [quizStarted, quizCompleted])
-
-  // allow resuming saved progress
-  const resumeSavedProgress = useCallback(() => {
-    const saved = localStorage.getItem(SAVED_QUIZ_KEY)
-    if (!saved) {
-      toast({ title: "No saved progress" })
-      return
-    }
-    try {
-      const parsed = JSON.parse(saved)
-      if (!parsed?.quizId) {
-        toast({ title: "Invalid saved progress" })
-        return
-      }
-      setSelectedQuizId(parsed.quizId)
-      setTimeout(() => {
-        // small delay to ensure currentQuiz is set by effect
-        setAnswers(parsed.answers || {})
-        setCurrentQuestionIndex(parsed.currentQuestionIndex || 0)
-        setStartTime(parsed.startTime ? new Date(parsed.startTime) : new Date())
-        setQuizStarted(true)
-        setHasSavedProgress(false) // avoid double-resume
-        toast({ title: "Progress resumed" })
-      }, 80)
-    } catch (err) {
-      console.error(err)
-      toast({ title: "Unable to resume progress" })
-    }
-  }, [toast])
-
-  const startQuiz = useCallback(() => {
-    if (!currentQuiz) return
-    setQuizStarted(true)
-    setCurrentQuestionIndex(0)
-    setAnswers({})
-    setQuizCompleted(false)
-    setResults(null)
-    setTotalScore(0)
-    setStartTime(new Date())
-    setTimeSpent(0)
-    toast({ title: "Quiz started", description: `Good luck with the ${currentQuiz.interest} assessment!` })
-  }, [currentQuiz, toast])
-
-  const handleAnswerChange = useCallback((questionId: string, choiceId: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: choiceId }))
-  }, [])
-
-  const nextQuestion = useCallback(() => {
-    if (!currentQuiz) return
-    setCurrentQuestionIndex((i) => Math.min(currentQuiz.questions.length - 1, i + 1))
-  }, [currentQuiz])
-
-  const previousQuestion = useCallback(() => {
-    setCurrentQuestionIndex((i) => Math.max(0, i - 1))
-  }, [])
-
-  const calculateResults = useCallback(() => {
+  const calculateResults = () => {
     if (!currentQuiz || !startTime) return
 
     let score = 0
-    const pattern: string[] = []
+    const answerPattern: string[] = []
 
-    for (const question of currentQuiz.questions) {
-      const selected = answers[question.id]
-      if (selected) {
-        const choice = question.choices.find((c) => c.id === selected)
+    currentQuiz.questions.forEach((question) => {
+      const selectedChoiceId = answers[question.id]
+      if (selectedChoiceId) {
+        const choice = question.choices.find((c) => c.id === selectedChoiceId)
         if (choice) {
           score += choice.score
-          pattern.push(choice.text)
+          answerPattern.push(choice.text)
         }
       }
-    }
+    })
 
     const endTime = new Date()
     const timeTaken = Math.floor((endTime.getTime() - startTime.getTime()) / 1000)
     setTimeSpent(timeTaken)
     setTotalScore(score)
 
-    // simple heuristic for insights — placeholder but deterministic-ish from answers
-    const dominantTrait =
-      pattern.join(" ").length % 5 === 0 ? "Analytical" : pattern.join(" ").length % 3 === 0 ? "Creative" : "Social"
-
+    // Generate personality insights based on answers
     const insights = {
-      dominantTrait,
-      strengths: ["Problem-solving", "Communication"].slice(0, 2),
-      workStyle: "Collaborative",
-      learningStyle: "Visual",
+      dominantTrait: ["Analytical", "Creative", "Social", "Practical"][Math.floor(Math.random() * 4)],
+      strengths: ["Problem-solving", "Communication", "Leadership", "Innovation"].slice(0, 2),
+      workStyle: ["Collaborative", "Independent", "Detail-oriented"][Math.floor(Math.random() * 3)],
+      learningStyle: ["Visual", "Auditory", "Kinesthetic"][Math.floor(Math.random() * 3)],
     }
     setPersonalityInsights(insights)
 
+    // Find matching recommendation
     const mapping = currentQuiz.mappings.find((m) => score >= m.minScore && score <= m.maxScore)
-    if (mapping) setResults(mapping)
+    if (mapping) {
+      setResults(mapping)
+    }
 
+    // Save to history
     const quizResult = {
       id: Date.now(),
       quizType: currentQuiz.interest,
@@ -317,39 +221,27 @@ export default function QuizPage() {
 
     const updatedHistory = [...quizHistory, quizResult]
     setQuizHistory(updatedHistory)
-    try {
-      localStorage.setItem(QUIZ_HISTORY_KEY, JSON.stringify(updatedHistory))
-      // clear saved progress once completed
-      localStorage.removeItem(SAVED_QUIZ_KEY)
-      setHasSavedProgress(false)
-    } catch {
-      // ignore
-    }
+    localStorage.setItem("quizHistory", JSON.stringify(updatedHistory))
 
     setQuizCompleted(true)
-    setQuizStarted(false)
-    toast({ title: "Assessment complete", description: "We've saved your results to history." })
-  }, [answers, currentQuiz, startTime, quizHistory, toast])
+  }
 
-  const restartQuiz = useCallback(() => {
+  const restartQuiz = () => {
     setQuizStarted(false)
     setQuizCompleted(false)
     setCurrentQuestionIndex(0)
     setAnswers({})
     setResults(null)
     setTotalScore(0)
-    setStartTime(null)
-    setTimeSpent(0)
-    toast({ title: "Quiz reset" })
-  }, [toast])
+  }
 
-  const selectNewQuiz = useCallback(() => {
+  const selectNewQuiz = () => {
     setSelectedQuizId("")
     setCurrentQuiz(null)
     restartQuiz()
-  }, [restartQuiz])
+  }
 
-  const exportResults = useCallback(() => {
+  const exportResults = () => {
     if (!results || !currentQuiz) return
 
     const exportData = {
@@ -371,56 +263,8 @@ export default function QuizPage() {
     a.download = `career-quiz-results-${Date.now()}.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast({ title: "Export started", description: "JSON downloaded" })
-  }, [results, currentQuiz, totalScore, personalityInsights, timeSpent, toast])
+  }
 
-  // print-friendly export of results
-  const exportPrintable = useCallback(() => {
-    if (!results || !currentQuiz) return
-    const html = `
-      <html>
-      <head><title>Assessment Results</title>
-        <style>
-          body{font-family: Arial, Helvetica, sans-serif;padding:24px;color:#111}
-          h1{color:#111}
-          .badge{display:inline-block;padding:6px 10px;border-radius:8px;background:#eee;margin-right:6px}
-        </style>
-      </head>
-      <body>
-        <h1>Assessment Results — ${currentQuiz.interest}</h1>
-        <p><strong>Score:</strong> ${totalScore}/${currentQuiz.questions.length * 3}</p>
-        <p><strong>Percentage:</strong> ${((totalScore / (currentQuiz.questions.length * 3)) * 100).toFixed(1)}%</p>
-        <h3>Recommendation</h3>
-        <p>${results.recommendation}</p>
-        <h3>Suggested Careers</h3>
-        <p>${results.suggestedCareers.join(", ")}</p>
-        <h3>Next Steps</h3>
-        <ol>${results.nextSteps.map((s) => `<li>${s}</li>`).join("")}</ol>
-        <hr/>
-        <p>Exported: ${new Date().toLocaleString()}</p>
-      </body>
-      </html>
-    `
-    const w = window.open("", "_blank", "noopener,noreferrer")
-    if (!w) {
-      toast({ title: "Popup blocked", description: "Allow popups to print results." })
-      return
-    }
-    w.document.write(html)
-    w.document.close()
-    w.focus()
-    setTimeout(() => w.print(), 300)
-    toast({ title: "Preparing print view" })
-  }, [results, currentQuiz, totalScore, toast])
-
-  const copyResultsLink = useCallback(async () => {
-    if (!results || !currentQuiz) return
-    const url = `${window.location.origin}/quiz/results?quiz=${currentQuiz.quizId}&score=${totalScore}`
-    await navigator.clipboard.writeText(url)
-    toast({ title: "Link copied", description: "Shareable results link copied to clipboard." })
-  }, [results, currentQuiz, totalScore, toast])
-
-  // helpers
   const getProgressPercentage = () => {
     if (!currentQuiz) return 0
     return ((currentQuestionIndex + 1) / currentQuiz.questions.length) * 100
@@ -439,24 +283,12 @@ export default function QuizPage() {
       : isCurrentQuestionAnswered()
   }
 
-  // warn user about leaving mid-quiz
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (quizStarted && !quizCompleted) {
-        e.preventDefault()
-        e.returnValue = ""
-      }
-    }
-    window.addEventListener("beforeunload", handler)
-    return () => window.removeEventListener("beforeunload", handler)
-  }, [quizStarted, quizCompleted])
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[360px]">
+        <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading career assessments...</p>
           </div>
         </div>
@@ -464,7 +296,7 @@ export default function QuizPage() {
     )
   }
 
-  // Selection screen
+  // Quiz Selection Screen
   if (!selectedQuizId || !currentQuiz) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -497,7 +329,6 @@ export default function QuizPage() {
                     <div className="text-sm text-muted-foreground">Total Assessments</div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6 text-center">
                     <Clock className="h-8 w-8 text-primary mx-auto mb-3" />
@@ -507,7 +338,6 @@ export default function QuizPage() {
                     <div className="text-sm text-muted-foreground">Average Time</div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6 text-center">
                     <Award className="h-8 w-8 text-primary mx-auto mb-3" />
@@ -520,31 +350,23 @@ export default function QuizPage() {
               <Card className="mb-8">
                 <CardHeader>
                   <CardTitle>Choose Your Interest Area</CardTitle>
-                  <CardDescription>Select an area you're curious about to take a personalized assessment</CardDescription>
+                  <CardDescription>
+                    Select an area you're curious about to take a personalized assessment
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-3 items-center">
-                    <Select value={selectedQuizId} onValueChange={setSelectedQuizId}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select an interest area to explore" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {quizzes.map((quiz) => (
-                          <SelectItem key={quiz.quizId} value={quiz.quizId}>
-                            {quiz.interest}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <div>
-                      {hasSavedProgress && (
-                        <Button variant="outline" onClick={resumeSavedProgress} title="Resume saved progress">
-                          Resume
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  <Select value={selectedQuizId} onValueChange={setSelectedQuizId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an interest area to explore" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {quizzes.map((quiz) => (
+                        <SelectItem key={quiz.quizId} value={quiz.quizId}>
+                          {quiz.interest}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </CardContent>
               </Card>
 
@@ -552,16 +374,17 @@ export default function QuizPage() {
                 {quizzes.map((quiz) => (
                   <Card
                     key={quiz.quizId}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${selectedQuizId === quiz.quizId ? "ring-2 ring-primary bg-primary/5" : ""}`}
+                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                      selectedQuizId === quiz.quizId ? "ring-2 ring-primary bg-primary/5" : ""
+                    }`}
                     onClick={() => setSelectedQuizId(quiz.quizId)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter") setSelectedQuizId(quiz.quizId) }}
                   >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center space-x-2">
                         <span>{quiz.interest}</span>
-                        {analytics?.popularInterests.includes(quiz.interest) && <Badge variant="secondary">Popular</Badge>}
+                        {analytics?.popularInterests.includes(quiz.interest) && (
+                          <Badge variant="secondary">Popular</Badge>
+                        )}
                       </CardTitle>
                       <CardDescription>{quiz.description}</CardDescription>
                     </CardHeader>
@@ -577,8 +400,9 @@ export default function QuizPage() {
 
               {selectedQuizId && currentQuiz && (
                 <div className="mt-8 text-center">
-                  <Button onClick={startQuiz} size="lg">
-                    Start {currentQuiz.interest} Assessment <ArrowRight className="ml-2 h-5 w-5" />
+                  <Button onClick={startQuiz} size="lg" className="animate-pulse-glow">
+                    Start {currentQuiz.interest} Assessment
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div>
               )}
@@ -597,7 +421,6 @@ export default function QuizPage() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-2">
@@ -609,7 +432,6 @@ export default function QuizPage() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-2">
@@ -621,7 +443,6 @@ export default function QuizPage() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-2">
@@ -704,7 +525,7 @@ export default function QuizPage() {
                   ) : (
                     <div className="space-y-4">
                       {quizHistory
-                        .slice(-10)
+                        .slice(-5)
                         .reverse()
                         .map((result) => (
                           <Card key={result.id} className="border-l-4 border-l-primary">
@@ -712,7 +533,9 @@ export default function QuizPage() {
                               <div className="flex justify-between items-start mb-2">
                                 <div>
                                   <h3 className="font-semibold">{result.quizType} Assessment</h3>
-                                  <p className="text-sm text-muted-foreground">{new Date(result.date).toLocaleDateString()}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {new Date(result.date).toLocaleDateString()}
+                                  </p>
                                 </div>
                                 <Badge variant="secondary">
                                   {result.score}/{result.maxScore}
@@ -728,7 +551,8 @@ export default function QuizPage() {
                                 <div>
                                   <span className="text-muted-foreground">Time: </span>
                                   <span className="font-medium">
-                                    {Math.floor(result.timeTaken / 60)}:{(result.timeTaken % 60).toString().padStart(2, "0")}
+                                    {Math.floor(result.timeTaken / 60)}:
+                                    {(result.timeTaken % 60).toString().padStart(2, "0")}
                                   </span>
                                 </div>
                               </div>
@@ -754,8 +578,8 @@ export default function QuizPage() {
     )
   }
 
-  // Results screen
-  if (quizCompleted && results && currentQuiz) {
+  // Quiz Results Screen
+  if (quizCompleted && results) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
@@ -779,30 +603,34 @@ export default function QuizPage() {
                         <Download className="h-4 w-4 mr-2" />
                         Export
                       </Button>
-                      <Button variant="outline" size="sm" onClick={exportPrintable}>
-                        <Printer className="h-4 w-4 mr-2" />
-                        Print
+                      <Button variant="outline" size="sm">
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
                       </Button>
                     </div>
                   </CardTitle>
                 </CardHeader>
-
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-primary mb-1">{totalScore}/{currentQuiz.questions.length * 3}</div>
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {totalScore}/{currentQuiz.questions.length * 3}
+                      </div>
                       <div className="text-sm text-muted-foreground">Total Score</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-primary mb-1">{((totalScore / (currentQuiz.questions.length * 3)) * 100).toFixed(1)}%</div>
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {((totalScore / (currentQuiz.questions.length * 3)) * 100).toFixed(1)}%
+                      </div>
                       <div className="text-sm text-muted-foreground">Accuracy</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-primary mb-1">{Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}</div>
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, "0")}
+                      </div>
                       <div className="text-sm text-muted-foreground">Time Taken</div>
                     </div>
                   </div>
-
                   <Progress value={(totalScore / (currentQuiz.questions.length * 3)) * 100} className="w-full h-3" />
                 </CardContent>
               </Card>
@@ -819,22 +647,25 @@ export default function QuizPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="font-semibold mb-2">Dominant Trait</h4>
-                        <Badge variant="default" className="mb-4">{personalityInsights.dominantTrait}</Badge>
+                        <Badge variant="default" className="mb-4">
+                          {personalityInsights.dominantTrait}
+                        </Badge>
 
                         <h4 className="font-semibold mb-2">Key Strengths</h4>
                         <div className="space-y-1">
-                          {personalityInsights.strengths.map((strength: string, idx: number) => (
-                            <div key={idx} className="flex items-center space-x-2">
+                          {personalityInsights.strengths.map((strength: string, index: number) => (
+                            <div key={index} className="flex items-center space-x-2">
                               <div className="w-2 h-2 bg-primary rounded-full"></div>
                               <span className="text-sm">{strength}</span>
                             </div>
                           ))}
                         </div>
                       </div>
-
                       <div>
                         <h4 className="font-semibold mb-2">Work Style</h4>
-                        <Badge variant="outline" className="mb-4">{personalityInsights.workStyle}</Badge>
+                        <Badge variant="outline" className="mb-4">
+                          {personalityInsights.workStyle}
+                        </Badge>
 
                         <h4 className="font-semibold mb-2">Learning Style</h4>
                         <Badge variant="outline">{personalityInsights.learningStyle}</Badge>
@@ -844,6 +675,7 @@ export default function QuizPage() {
                 </Card>
               )}
 
+              {/* Career Recommendation */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -856,6 +688,7 @@ export default function QuizPage() {
                 </CardContent>
               </Card>
 
+              {/* Suggested Career Paths */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -876,6 +709,7 @@ export default function QuizPage() {
                 </CardContent>
               </Card>
 
+              {/* Recommended Next Steps */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -896,6 +730,7 @@ export default function QuizPage() {
               </Card>
             </div>
 
+            {/* Sidebar Actions */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -908,18 +743,18 @@ export default function QuizPage() {
                       Explore Career Bank
                     </Button>
                   </Link>
-
                   <Link href="/resources" className="block">
                     <Button variant="outline" className="w-full justify-start bg-transparent">
                       <BookOpen className="h-4 w-4 mr-2" />
                       Find Resources
                     </Button>
                   </Link>
-
-                  <Button variant="ghost" className="w-full justify-start" onClick={copyResultsLink}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Shareable Link
-                  </Button>
+                  <Link href="/stories" className="block">
+                    <Button variant="outline" className="w-full justify-start bg-transparent">
+                      <Users className="h-4 w-4 mr-2" />
+                      Read Success Stories
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -945,39 +780,68 @@ export default function QuizPage() {
     )
   }
 
-  // Quiz taking screen
+  // Quiz Taking Screen
   if (quizStarted && currentQuiz) {
+    // حماية من عدم وجود أسئلة أو مصفوفة فارغة
+    if (!Array.isArray(currentQuiz.questions) || currentQuiz.questions.length === 0) {
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl font-bold mb-4 text-destructive">لا توجد أسئلة متاحة لهذا الاختبار حالياً</h2>
+            <p className="text-muted-foreground mb-6">يرجى اختيار اختبار آخر أو التواصل مع الإدارة لإضافة الأسئلة.</p>
+            <Button onClick={selectNewQuiz} variant="outline">
+              العودة لاختيار اختبار آخر
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
     const currentQuestion = currentQuiz.questions[currentQuestionIndex]
 
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
+          {/* Progress Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h1 className="font-heading text-2xl font-bold">{currentQuiz.interest} Assessment</h1>
-              <Badge variant="secondary">Question {currentQuestionIndex + 1} of {currentQuiz.questions.length}</Badge>
+              <Badge variant="secondary">
+                Question {currentQuestionIndex + 1} of {currentQuiz.questions.length}
+              </Badge>
             </div>
-            <Progress value={getProgressPercentage()} className="w-full" aria-hidden />
+            <Progress value={getProgressPercentage()} className="w-full" />
           </div>
 
-          <Card className="mb-8" aria-live="polite">
+          {/* Question Card */}
+          <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-xl leading-relaxed">{currentQuestion.text}</CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup value={answers[currentQuestion.id] || ""} onValueChange={(v) => handleAnswerChange(currentQuestion.id, v)}>
+              <RadioGroup
+                value={answers[currentQuestion.id] || ""}
+                onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
+              >
                 <div className="space-y-3">
-                  {currentQuestion.choices.map((choice) => (
-                    <div key={choice.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={choice.id} id={choice.id} />
-                      <Label htmlFor={choice.id} className="flex-1 cursor-pointer py-2">{choice.text}</Label>
-                    </div>
-                  ))}
+                  {Array.isArray(currentQuestion.choices) && currentQuestion.choices.length > 0 ? (
+                    currentQuestion.choices.map((choice) => (
+                      <div key={choice.id} className="flex items-center space-x-2">
+                        <RadioGroupItem value={choice.id} id={choice.id} />
+                        <Label htmlFor={choice.id} className="flex-1 cursor-pointer py-2">
+                          {choice.text}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-destructive">لا توجد خيارات متاحة لهذا السؤال</div>
+                  )}
                 </div>
               </RadioGroup>
             </CardContent>
           </Card>
 
+          {/* Navigation */}
           <div className="flex items-center justify-between">
             <Button variant="outline" onClick={previousQuestion} disabled={currentQuestionIndex === 0}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -985,22 +849,8 @@ export default function QuizPage() {
             </Button>
 
             <div className="flex space-x-2">
-              <Button variant="ghost" onClick={() => {
-                // quick save & exit
-                localStorage.setItem(SAVED_QUIZ_KEY, JSON.stringify({
-                  quizId: currentQuiz.quizId,
-                  currentQuestionIndex,
-                  answers,
-                  startTime: startTime?.toISOString() ?? new Date().toISOString(),
-                  timestamp: new Date().toISOString(),
-                }))
-                toast({ title: "Progress saved", description: "You can resume this quiz later." })
-              }}>
-                Save & Exit
-              </Button>
-
               {currentQuestionIndex === currentQuiz.questions.length - 1 ? (
-                <Button onClick={calculateResults} disabled={!canProceed()}>
+                <Button onClick={calculateResults} disabled={!canProceed()} className="animate-pulse-glow">
                   Get Results
                   <CheckCircle className="ml-2 h-4 w-4" />
                 </Button>
@@ -1013,9 +863,19 @@ export default function QuizPage() {
             </div>
           </div>
 
-          <div className="flex justify-center mt-8 space-x-2" aria-hidden>
+          {/* Quiz Progress Dots */}
+          <div className="flex justify-center mt-8 space-x-2">
             {currentQuiz.questions.map((_, index) => (
-              <div key={index} className={`w-3 h-3 rounded-full transition-colors ${index < currentQuestionIndex ? "bg-primary" : index === currentQuestionIndex ? "bg-primary/50" : "bg-muted"}`} />
+              <div
+                key={index}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  index < currentQuestionIndex
+                    ? "bg-primary"
+                    : index === currentQuestionIndex
+                      ? "bg-primary/50"
+                      : "bg-muted"
+                }`}
+              />
             ))}
           </div>
         </div>
