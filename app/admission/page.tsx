@@ -1,389 +1,247 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import {
-  BookOpen,
-  Globe,
-  GraduationCap,
-  FileText,
-  Download,
-  ExternalLink,
-  CheckCircle,
-  ArrowRight,
-  ChevronDown,
-} from "lucide-react"
+import { Target, Heart, Lightbulb, Globe } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
-type Stream = {
-  id: string
-  name: string
-  icon: string
-  description: string
-  requirements: string[]
-  careers: string[]
-  image?: string
-}
+export default function AboutPage() {
+  const teamMembers = [
+    {
+      name: "Dr. Sarah Rodriguez",
+      role: "Founder & Lead Career Counselor",
+      bio: "With over 15 years of experience in career counseling and educational psychology, Dr. Rodriguez founded NextStep Navigator to make career guidance accessible to everyone.",
+      expertise: ["Career Psychology", "Educational Guidance", "Leadership Development"],
+      initials: "SR",
+    },
+    {
+      name: "Michael Johnson",
+      role: "Industry Relations Specialist",
+      bio: "Michael brings 12 years of corporate experience across tech, healthcare, and finance industries, providing real-world insights into career opportunities.",
+      expertise: ["Industry Trends", "Corporate Relations", "Professional Development"],
+      initials: "MJ",
+    },
+    {
+      name: "Dr. Priya Patel",
+      role: "Educational Pathways Advisor",
+      bio: "Former university admissions director with expertise in international education and study abroad programs.",
+      expertise: ["Higher Education", "Study Abroad", "Academic Planning"],
+      initials: "PP",
+    },
+    {
+      name: "James Chen",
+      role: "Technology & Innovation Lead",
+      bio: "Software engineer turned career coach, specializing in tech careers and the future of work in digital industries.",
+      expertise: ["Tech Careers", "Digital Skills", "Innovation"],
+      initials: "JC",
+    },
+  ]
 
-type Step = { step: number; title: string; description: string; details: string[] }
+  const values = [
+    {
+      icon: <Target className="h-8 w-8 text-primary" />,
+      title: "Personalized Guidance",
+      description:
+        "Every individual has unique strengths and aspirations. We provide tailored career advice that fits your personal journey.",
+    },
+    {
+      icon: <Globe className="h-8 w-8 text-primary" />,
+      title: "Accessible to All",
+      description:
+        "Career guidance shouldn't be a privilege. Our platform is designed to be accessible to students and professionals worldwide.",
+    },
+    {
+      icon: <Lightbulb className="h-8 w-8 text-primary" />,
+      title: "Evidence-Based Approach",
+      description:
+        "Our recommendations are backed by research, industry data, and real-world success stories from diverse career paths.",
+    },
+    {
+      icon: <Heart className="h-8 w-8 text-primary" />,
+      title: "Empowerment Through Knowledge",
+      description:
+        "We believe that informed decisions lead to fulfilling careers. We provide the knowledge and tools for confident career choices.",
+    },
+  ]
 
-type Country = {
-  name: string
-  flag: string
-  popular: string
-  info?: string
-}
-
-type DownloadItem = { label: string; file: string }
-type ExternalResource = { name: string; url: string; desc: string }
-
-type AdmissionData = {
-  title: string
-  subtitle?: string
-  streams: Stream[]
-  studyAbroadSteps: Step[]
-  countries: Country[]
-  downloads: DownloadItem[]
-  externalResources: ExternalResource[]
-}
-
-export default function AdmissionPage() {
-  const [data, setData] = useState<AdmissionData | null>(null)
-  const [selectedStream, setSelectedStream] = useState<string | null>(null)
-  const [activeStep, setActiveStep] = useState<number | null>(null)
-  const [activeCountry, setActiveCountry] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetch("/data/admission.json")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(console.error)
-  }, [])
-
-  if (!data) return null
-
-  const { title, subtitle, streams: streamData, studyAbroadSteps, countries, downloads, externalResources } = data
-
-  const pickDownloadStyle = (label: string, file: string) => {
-    const l = (label || "").toLowerCase()
-    const f = (file || "").toLowerCase()
-    const isAdmission = l.includes("admission") || f.includes("admission")
-    const isStudyAbroad = l.includes("study") || l.includes("checklist") || f.includes("study-abroad")
-    const isScholarship = l.includes("scholarship") || f.includes("scholarship")
-
-    if (isAdmission) return { wrap: "bg-[var(--color-muted)]", dot: "bg-[var(--color-primary)]", iconColor: "text-[var(--color-primary-foreground)]", btn: "bg-[var(--color-primary)] hover:bg-[var(--color-primary-foreground)]" }
-    if (isStudyAbroad) return { wrap: "bg-[var(--color-muted)]", dot: "bg-[var(--color-secondary)]", iconColor: "text-[var(--color-secondary-foreground)]", btn: "bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-foreground)]" }
-    if (isScholarship) return { wrap: "bg-[var(--color-muted)]", dot: "bg-[var(--color-accent)]", iconColor: "text-[var(--color-accent-foreground)]", btn: "bg-[var(--color-accent)] hover:bg-[var(--color-accent-foreground)]" }
-    return { wrap: "bg-[var(--color-muted)]", dot: "bg-[var(--color-muted-foreground)]", iconColor: "text-[var(--color-foreground)]", btn: "bg-[var(--color-foreground)] hover:bg-[var(--color-muted-foreground)]" }
-  }
-
-  const isImage = (v?: string) => !!v && (/^https?:\/\//.test(v) || v.startsWith("/"))
+  const milestones = [
+    { year: "2020", event: "NextStep Navigator founded with a vision to democratize career guidance" },
+    { year: "2021", event: "Launched comprehensive career assessment tools and resource library" },
+    { year: "2022", event: "Reached 10,000+ users across 25 countries" },
+    { year: "2023", event: "Partnered with leading universities and corporations for real-world insights" },
+    { year: "2024", event: "Expanded to include AI-powered career matching and personalized learning paths" },
+  ]
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      {/* Header */}
-      <div className="bg-[var(--color-card)] shadow-sm border-b border-[var(--color-border)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-3 mb-4">
-            <GraduationCap className="h-8 w-8 text-[var(--color-primary)]" />
-            <h1 className="text-4xl font-bold text-[var(--color-foreground)]">{title}</h1>
-          </motion.div>
-          {subtitle && <p className="text-xl text-[var(--color-muted-foreground)] max-w-3xl mx-auto">{subtitle}</p>}
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-16 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-4">
+            About NextStep Navigator
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto font-body">
+            Empowering individuals to make informed career decisions through comprehensive guidance, personalized
+            assessments, and real-world insights from industry experts.
+          </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Stream Selection */}
-        <section>
-          <div className="text-center mb-12">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-center justify-center gap-3 mb-4">
-              <BookOpen className="h-6 w-6 text-[var(--color-primary)]" />
-              <h2 className="text-3xl font-bold text-[var(--color-foreground)]">Stream Selection Guide</h2>
-            </motion.div>
-            <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
-              Choose the right academic path based on your interests, strengths, and career goals
-            </p>
+        {/* Mission & Vision */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <Card className="border-l-4 border-primary bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-foreground">
+                <Target className="h-6 w-6 text-primary" />
+                <span>Our Mission</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground font-body leading-relaxed">
+                To provide accessible, comprehensive, and personalized career guidance that empowers individuals at
+                every stage of their professional journey. We bridge the gap between academic learning and real-world
+                career opportunities through innovative tools and expert insights.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-secondary bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-foreground">
+                <Lightbulb className="h-6 w-6 text-secondary" />
+                <span>Our Vision</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground font-body leading-relaxed">
+                A world where every individual has access to the guidance and resources needed to pursue fulfilling
+                careers aligned with their passions, skills, and values. We envision a future where career decisions are
+                made with confidence and clarity.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Core Values */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-heading font-bold text-foreground text-center mb-8">Our Core Values</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {values.map((value, index) => (
+              <Card
+                key={index}
+                className="text-center hover:shadow-lg transition-shadow bg-card"
+              >
+                <CardHeader>
+                  <div className="flex justify-center mb-4">{value.icon}</div>
+                  <CardTitle className="text-lg text-foreground">{value.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground font-body leading-relaxed">{value.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {streamData.map((stream, index) => {
-              const isOpen = selectedStream === stream.id
-              return (
-                <motion.div
-                  key={stream.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.06 }}
-                  className={`rounded-2xl overflow-hidden transition-all duration-300 border border-[var(--color-border)] ${isOpen ? 'ring-2 ring-[var(--color-primary)] shadow-xl' : 'hover:shadow-xl'}`}
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => setSelectedStream(isOpen ? null : stream.id)}
-                    className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                    aria-expanded={isOpen}
-                    aria-controls={`${stream.id}-details`}
-                    type="button"
-                  >
-                    <img src={stream.image || "/placeholder.svg"} alt={stream.name} loading="lazy" className="w-full h-48 object-cover" />
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-2xl">{stream.icon}</span>
-                        <h3 className="text-xl font-bold text-[var(--color-foreground)]">{stream.name}</h3>
-                      </div>
-                      <p className="text-[var(--color-muted-foreground)]">{stream.description}</p>
-                      <div className="mt-2 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                        <span className="opacity-80">{isOpen ? "Click to collapse" : "Click to see details"}</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                      </div>
+        {/* Our Story */}
+        <div className="mb-16">
+          <Card className="bg-card">
+            <CardHeader>
+              <CardTitle className="text-2xl text-foreground">Our Story</CardTitle>
+              <CardDescription className="text-muted-foreground">How NextStep Navigator came to be</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground font-body leading-relaxed">
+                NextStep Navigator was born from a simple observation: too many talented individuals struggle to find
+                their ideal career path due to lack of accessible, comprehensive guidance. Our founder, Dr. Sarah
+                Rodriguez, witnessed countless students and professionals making career decisions based on limited
+                information or societal pressure rather than their true interests and potential.
+              </p>
+              <p className="text-muted-foreground font-body leading-relaxed">
+                In 2020, during a time when the job market was rapidly evolving, we launched NextStep Navigator with a
+                mission to democratize career guidance. We combined evidence-based career counseling principles with
+                modern technology to create a platform that serves users regardless of their location, background, or
+                economic situation.
+              </p>
+              <p className="text-muted-foreground font-body leading-relaxed">
+                Today, we're proud to have helped thousands of individuals discover fulfilling career paths, from high
+                school students choosing their first major to experienced professionals making strategic career
+                transitions. Our platform continues to evolve, incorporating the latest research in career development
+                and feedback from our global community.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Timeline */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-heading font-bold text-foreground text-center mb-8">Our Journey</h2>
+          <div className="space-y-6">
+            {milestones.map((milestone, index) => (
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-slide-in-left">
+                <div className="flex-shrink-0 w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <span className="text-primary font-bold">{milestone.year}</span>
+                </div>
+                <div className="flex-1 bg-card rounded-lg p-4 shadow-sm">
+                  <p className="text-muted-foreground font-body">{milestone.event}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Team */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-heading font-bold text-foreground text-center mb-8">Meet Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {teamMembers.map((member, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow bg-card">
+                <CardHeader>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-semibold text-lg">{member.initials}</span>
                     </div>
-                  </motion.button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        id={`${stream.id}-details`}
-                        key={`${stream.id}-details`}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="p-6 space-y-4 border-t border-[var(--color-border)] overflow-hidden"
-                      >
-                        <div>
-                          <h4 className="font-semibold text-[var(--color-foreground)] mb-2">Requirements:</h4>
-                          <ul className="space-y-1">
-                            {stream.requirements.map((req, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-sm text-[var(--color-muted-foreground)]">
-                                <CheckCircle className="h-4 w-4 text-[var(--color-primary)] mt-0.5 flex-shrink-0" />
-                                {req}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-[var(--color-foreground)] mb-2">Career Paths:</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {stream.careers.map((career, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] text-xs rounded-full">
-                                {career}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Study Abroad */}
-        <section>
-          <div className="text-center mb-12">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-center justify-center gap-3 mb-4">
-              <Globe className="h-6 w-6 text-[var(--color-primary)]" />
-              <h2 className="text-3xl font-bold text-[var(--color-foreground)]">Study Abroad Guidelines</h2>
-            </motion.div>
-            <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">Step-by-step guide to pursuing international education opportunities</p>
-          </div>
-
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-[var(--color-foreground)] mb-8 text-center">Application Process</h3>
-            <div className="space-y-6">
-              {studyAbroadSteps.map((item, index) => {
-                const open = activeStep === item.step
-                return (
-                  <motion.div
-                    key={item.step}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.06 }}
-                    className={`rounded-2xl overflow-hidden transition-all duration-300 border border-[var(--color-border)] ${open ? 'ring-2 ring-[var(--color-primary)] shadow-xl' : 'hover:shadow-xl'}`}
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      onClick={() => setActiveStep(open ? null : item.step)}
-                      className="w-full text-left p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                      aria-expanded={open}
-                      aria-controls={`step-${item.step}-details`}
-                      type="button"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-12 h-12 bg-[var(--color-primary)/10] rounded-full flex items-center justify-center">
-                          <span className="text-[var(--color-primary)] font-bold text-lg">{item.step}</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-xl font-bold text-[var(--color-foreground)] mb-2">{item.title}</h4>
-                          <p className="text-[var(--color-muted-foreground)] mb-1">{item.description}</p>
-                          <div className="mt-1 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                            <span className="opacity-80">{open ? "Click to collapse" : "Tap to expand"}</span>
-                            <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.button>
-
-                    <AnimatePresence initial={false}>
-                      {open && (
-                        <motion.div
-                          id={`step-${item.step}-details`}
-                          key={`step-${item.step}-details`}
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="px-6 pb-6 space-y-2 overflow-hidden"
-                        >
-                          {item.details.map((detail, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                              <ArrowRight className="h-4 w-4 text-[var(--color-primary)]" />
-                              {detail}
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Popular Destinations */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-[var(--color-foreground)] mb-8 text-center">Popular Study Destinations</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {countries.map((country, index) => {
-                const isOpen = activeCountry === country.name
-                return (
-                  <motion.div
-                    key={country.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.06 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.99 }}
-                    className={`group rounded-2xl p-6 transition-all duration-300 border border-[var(--color-border)] cursor-pointer ${isOpen ? 'ring-2 ring-[var(--color-primary)] shadow-xl' : 'hover:shadow-xl'}`}
-                    onClick={() => setActiveCountry(isOpen ? null : country.name)}
-                    role="button"
-                    aria-expanded={isOpen}
-                    aria-controls={`country-${index}-info`}
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      {isImage(country.flag) ? (
-                        <img
-                          src={country.flag}
-                          alt={`${country.name} flag`}
-                          loading="lazy"
-                          className="w-12 h-8 object-contain bg-[var(--color-card)] ring-1 ring-[var(--color-border)]"
-                        />
-                      ) : (
-                        <span className="text-3xl">{country.flag}</span>
-                      )}
-                      <h4 className="text-xl font-bold text-[var(--color-foreground)]">{country.name}</h4>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-foreground">{member.name}</CardTitle>
+                      <CardDescription className="text-primary font-medium">{member.role}</CardDescription>
                     </div>
-
-                    <p className="text-[var(--color-muted-foreground)]">
-                      <span className="font-semibold">Popular Universities:</span> {country.popular}
-                    </p>
-
-                    <div className="mt-3 flex items-center gap-2 text-sm">
-                      <span className="text-[var(--color-muted-foreground)] opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0">
-                        {isOpen ? "Click to collapse" : "Click to see more"}
-                      </span>
-                      <ChevronDown
-                        className={`h-4 w-4 text-[var(--color-muted-foreground)] transition-transform duration-200 ${isOpen ? "rotate-180" : "group-hover:translate-y-0.5"}`}
-                      />
-                    </div>
-
-                    <AnimatePresence initial={false}>
-                      {isOpen && country.info && (
-                        <motion.div
-                          id={`country-${index}-info`}
-                          key={`country-${index}-info`}
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="mt-3 text-sm text-[var(--color-muted-foreground)] overflow-hidden"
-                        >
-                          {country.info}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Resources */}
-        <section className="rounded-3xl p-8 border border-[var(--color-border)]">
-          <div className="text-center mb-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-center justify-center gap-3 mb-4">
-              <FileText className="h-6 w-6 text-[var(--color-primary)]" />
-              <h2 className="text-3xl font-bold text-[var(--color-foreground)]">Download Resources</h2>
-            </motion.div>
-            <p className="text-lg text-[var(--color-muted-foreground)]">Get comprehensive guides and templates to support your academic journey</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {downloads.map((d, idx) => {
-              const style = pickDownloadStyle(d.label, d.file)
-              return (
-                <motion.div
-                  key={d.file}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.06 }}
-                  className={`text-center p-6 rounded-2xl ${style.wrap}`}
-                >
-                  <div className={`w-16 h-16 ${style.dot} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                    <FileText className={`h-8 w-8 ${style.iconColor}`} />
                   </div>
-                  <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-3">{d.label}</h3>
-                  <a href={d.file} download className={`inline-flex items-center gap-2 text-white px-6 py-3 rounded-xl transition-colors ${style.btn}`}>
-                    <Download className="h-4 w-4" />
-                    Download
-                  </a>
-                </motion.div>
-              )
-            })}
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
-            <h3 className="text-2xl font-bold text-[var(--color-foreground)] mb-6 text-center">Useful External Resources</h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {externalResources.map((resource, index) => (
-                <motion.a
-                  key={resource.name}
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.06 }}
-                  className="flex items-center gap-3 p-4 rounded-xl transition-colors bg-[var(--color-muted)] hover:bg-[var(--color-card)]"
-                >
-                  <ExternalLink className="h-5 w-5 text-[var(--color-muted-foreground)]" />
-                  <div>
-                    <div className="font-semibold text-[var(--color-foreground)]">{resource.name}</div>
-                    <div className="text-sm text-[var(--color-muted-foreground)]">{resource.desc}</div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4 font-body leading-relaxed">{member.bio}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {member.expertise.map((skill, skillIndex) => (
+                      <Badge key={skillIndex} variant="secondary" className="font-body">
+                        {skill}
+                      </Badge>
+                    ))}
                   </div>
-                </motion.a>
-              ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="bg-card rounded-lg shadow-md p-8 text-center">
+          <h2 className="text-2xl font-heading font-bold text-foreground mb-8">Our Impact</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">25,000+</div>
+              <p className="text-muted-foreground font-body">Users Guided</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">500+</div>
+              <p className="text-muted-foreground font-body">Career Profiles</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">50+</div>
+              <p className="text-muted-foreground font-body">Countries Reached</p>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">95%</div>
+              <p className="text-muted-foreground font-body">User Satisfaction</p>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )

@@ -38,25 +38,25 @@ export default function AboutPage() {
 
   const values = [
     {
-      icon: <Target className="h-8 w-8 text-green-600" />,
+      icon: <Target className="h-8 w-8 text-primary" />,
       title: "Personalized Guidance",
       description:
         "Every individual has unique strengths and aspirations. We provide tailored career advice that fits your personal journey.",
     },
     {
-      icon: <Globe className="h-8 w-8 text-green-600" />,
+      icon: <Globe className="h-8 w-8 text-primary" />,
       title: "Accessible to All",
       description:
         "Career guidance shouldn't be a privilege. Our platform is designed to be accessible to students and professionals worldwide.",
     },
     {
-      icon: <Lightbulb className="h-8 w-8 text-green-600" />,
+      icon: <Lightbulb className="h-8 w-8 text-primary" />,
       title: "Evidence-Based Approach",
       description:
         "Our recommendations are backed by research, industry data, and real-world success stories from diverse career paths.",
     },
     {
-      icon: <Heart className="h-8 w-8 text-green-600" />,
+      icon: <Heart className="h-8 w-8 text-primary" />,
       title: "Empowerment Through Knowledge",
       description:
         "We believe that informed decisions lead to fulfilling careers. We provide the knowledge and tools for confident career choices.",
@@ -72,12 +72,12 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-background text-foreground transition-colors">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">About NextStep Navigator</h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">About NextStep Navigator</h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto">
             Empowering individuals to make informed career decisions through comprehensive guidance, personalized
             assessments, and real-world insights from industry experts.
           </p>
@@ -85,15 +85,15 @@ export default function AboutPage() {
 
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-          <Card className="border-l-4 border-l-green-500">
+          <Card className="border-l-4 border-l-primary">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Target className="h-6 w-6 text-green-600" />
+                <Target className="h-6 w-6 text-primary" />
                 <span>Our Mission</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 To provide accessible, comprehensive, and personalized career guidance that empowers individuals at
                 every stage of their professional journey. We bridge the gap between academic learning and real-world
                 career opportunities through innovative tools and expert insights.
@@ -101,15 +101,15 @@ export default function AboutPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-blue-500">
+          <Card className="border-l-4 border-l-secondary">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Lightbulb className="h-6 w-6 text-blue-600" />
+                <Lightbulb className="h-6 w-6 text-secondary" />
                 <span>Our Vision</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 A world where every individual has access to the guidance and resources needed to pursue fulfilling
                 careers aligned with their passions, skills, and values. We envision a future where career decisions are
                 made with confidence and clarity.
@@ -120,7 +120,7 @@ export default function AboutPage() {
 
         {/* Core Values */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Our Core Values</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
@@ -129,7 +129,7 @@ export default function AboutPage() {
                   <CardTitle className="text-lg">{value.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{value.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -144,19 +144,19 @@ export default function AboutPage() {
               <CardDescription>How NextStep Navigator came to be</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 NextStep Navigator was born from a simple observation: too many talented individuals struggle to find
                 their ideal career path due to lack of accessible, comprehensive guidance. Our founder, Dr. Sarah
                 Rodriguez, witnessed countless students and professionals making career decisions based on limited
                 information or societal pressure rather than their true interests and potential.
               </p>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 In 2020, during a time when the job market was rapidly evolving, we launched NextStep Navigator with a
                 mission to democratize career guidance. We combined evidence-based career counseling principles with
                 modern technology to create a platform that serves users regardless of their location, background, or
                 economic situation.
               </p>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 Today, we're proud to have helped thousands of individuals discover fulfilling career paths, from high
                 school students choosing their first major to experienced professionals making strategic career
                 transitions. Our platform continues to evolve, incorporating the latest research in career development
@@ -168,15 +168,15 @@ export default function AboutPage() {
 
         {/* Timeline */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Our Journey</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Our Journey</h2>
           <div className="space-y-6">
             {milestones.map((milestone, index) => (
-              <div key={index} className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-bold">{milestone.year}</span>
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex-shrink-0 w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <span className="text-primary font-bold">{milestone.year}</span>
                 </div>
-                <div className="flex-1 bg-white rounded-lg p-4 shadow-sm">
-                  <p className="text-gray-700">{milestone.event}</p>
+                <div className="flex-1 bg-card rounded-lg p-4 shadow-sm">
+                  <p className="text-muted-foreground">{milestone.event}</p>
                 </div>
               </div>
             ))}
@@ -185,23 +185,23 @@ export default function AboutPage() {
 
         {/* Team */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Meet Our Team</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {teamMembers.map((member, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start space-x-4">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-green-600 font-semibold text-lg">{member.initials}</span>
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-semibold text-lg">{member.initials}</span>
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-xl">{member.name}</CardTitle>
-                      <CardDescription className="text-green-600 font-medium">{member.role}</CardDescription>
+                      <CardDescription className="text-primary font-medium">{member.role}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 mb-4 leading-relaxed">{member.bio}</p>
+                  <p className="mb-4 leading-relaxed text-muted-foreground">{member.bio}</p>
                   <div className="flex flex-wrap gap-2">
                     {member.expertise.map((skill, skillIndex) => (
                       <Badge key={skillIndex} variant="secondary">
@@ -216,24 +216,24 @@ export default function AboutPage() {
         </div>
 
         {/* Stats */}
-        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Our Impact</h2>
+        <div className="bg-card rounded-lg shadow-md p-8 text-center">
+          <h2 className="text-2xl font-bold mb-8">Our Impact</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">25,000+</div>
-              <p className="text-gray-600">Users Guided</p>
+              <div className="text-3xl font-bold text-primary mb-2">25,000+</div>
+              <p className="text-muted-foreground">Users Guided</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">500+</div>
-              <p className="text-gray-600">Career Profiles</p>
+              <div className="text-3xl font-bold text-primary mb-2">500+</div>
+              <p className="text-muted-foreground">Career Profiles</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">50+</div>
-              <p className="text-gray-600">Countries Reached</p>
+              <div className="text-3xl font-bold text-primary mb-2">50+</div>
+              <p className="text-muted-foreground">Countries Reached</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">95%</div>
-              <p className="text-gray-600">User Satisfaction</p>
+              <div className="text-3xl font-bold text-primary mb-2">95%</div>
+              <p className="text-muted-foreground">User Satisfaction</p>
             </div>
           </div>
         </div>

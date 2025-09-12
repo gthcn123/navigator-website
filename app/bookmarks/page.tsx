@@ -124,7 +124,6 @@ export default function BookmarksPage() {
         console.log("Error sharing:", error)
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(shareText)
       toast({
         title: "Copied to clipboard",
@@ -143,33 +142,33 @@ export default function BookmarksPage() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "career":
-        return "bg-blue-100 text-blue-800"
+        return "bg-primary/10 text-primary"
       case "resource":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
       case "story":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-muted text-muted-foreground"
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">My Bookmarks</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-foreground mb-4">My Bookmarks</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Your saved careers, resources, and success stories with personal notes.
           </p>
         </div>
 
         {/* Actions Bar */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-card rounded-lg shadow-md p-6 mb-8 border">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex-1 max-w-md">
+            <div className="flex-1 w-full md:max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search bookmarks and notes..."
                   value={searchTerm}
@@ -178,7 +177,7 @@ export default function BookmarksPage() {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full md:w-auto justify-center">
               <Button onClick={shareBookmarks} variant="outline" disabled={bookmarks.length === 0}>
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
@@ -186,7 +185,7 @@ export default function BookmarksPage() {
               <Button
                 onClick={exportBookmarks}
                 disabled={bookmarks.length === 0}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export ({bookmarks.length})
@@ -199,22 +198,28 @@ export default function BookmarksPage() {
         {filteredBookmarks.length > 0 ? (
           <div className="space-y-6">
             {filteredBookmarks.map((bookmark) => (
-              <Card key={bookmark.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={bookmark.id}
+                className="hover:shadow-lg transition-shadow border bg-card text-card-foreground"
+              >
                 <CardHeader>
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <Badge className={getTypeColor(bookmark.type)}>{bookmark.type}</Badge>
                         {bookmark.category && <Badge variant="outline">{bookmark.category}</Badge>}
                         {bookmark.industry && <Badge variant="secondary">{bookmark.industry}</Badge>}
                       </div>
                       <CardTitle className="text-xl">
-                        <Link href={bookmark.url} className="hover:text-green-600 transition-colors">
+                        <Link
+                          href={bookmark.url}
+                          className="hover:text-primary transition-colors break-words"
+                        >
                           {bookmark.title}
                         </Link>
                       </CardTitle>
                       <CardDescription className="mt-2">{bookmark.description}</CardDescription>
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="text-sm text-muted-foreground mt-2">
                         Saved on {new Date(bookmark.savedAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -222,7 +227,7 @@ export default function BookmarksPage() {
                       onClick={() => removeBookmark(bookmark.id)}
                       variant="ghost"
                       size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 self-start"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -232,7 +237,7 @@ export default function BookmarksPage() {
                   <div className="space-y-3">
                     <div className="border-t pt-3">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">Personal Note</h4>
+                        <h4 className="font-medium text-foreground">Personal Note</h4>
                         {editingNote !== bookmark.id && (
                           <Button onClick={() => startEditingNote(bookmark)} variant="ghost" size="sm">
                             <Edit3 className="h-4 w-4" />
@@ -248,11 +253,11 @@ export default function BookmarksPage() {
                             placeholder="Add your personal notes about this item..."
                             className="min-h-[80px]"
                           />
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <Button
                               onClick={() => updateNote(bookmark.id, noteText)}
                               size="sm"
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                               <Save className="h-4 w-4 mr-2" />
                               Save
@@ -264,11 +269,11 @@ export default function BookmarksPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="bg-muted rounded-lg p-3">
                           {bookmark.note ? (
-                            <p className="text-gray-700 whitespace-pre-wrap">{bookmark.note}</p>
+                            <p className="text-foreground whitespace-pre-wrap break-words">{bookmark.note}</p>
                           ) : (
-                            <p className="text-gray-500 italic">
+                            <p className="text-muted-foreground italic">
                               No notes added yet. Click the edit button to add your thoughts.
                             </p>
                           )}
@@ -282,17 +287,17 @@ export default function BookmarksPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <Bookmark className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-medium text-gray-900 mb-2">
+            <Bookmark className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-2xl font-medium text-foreground mb-2">
               {bookmarks.length === 0 ? "No bookmarks yet" : "No matching bookmarks"}
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-muted-foreground mb-6">
               {bookmarks.length === 0
                 ? "Start exploring careers, resources, and success stories to build your collection."
                 : "Try adjusting your search terms to find what you're looking for."}
             </p>
             {bookmarks.length === 0 && (
-              <div className="flex gap-4 justify-center">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <Button asChild>
                   <Link href="/career-bank">Explore Careers</Link>
                 </Button>
