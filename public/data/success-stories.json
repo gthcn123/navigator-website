@@ -2,7 +2,7 @@
   {
     "id": "story_001",
     "name": "Sarah Chen",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/Sarah Chen.jpg",
     "currentRole": "Senior Software Engineer",
     "company": "Google",
     "domain": "Technology",
@@ -29,7 +29,7 @@
   {
     "id": "story_002",
     "name": "Marcus Johnson",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/Marcus Johnson.jpg",
     "currentRole": "Registered Nurse",
     "company": "Johns Hopkins Hospital",
     "domain": "Healthcare",
@@ -56,7 +56,7 @@
   {
     "id": "story_003",
     "name": "Emily Rodriguez",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/Emily Rodriguez.jpg",
     "currentRole": "Creative Director",
     "company": "Ogilvy",
     "domain": "Creative Arts",
@@ -83,7 +83,7 @@
   {
     "id": "story_004",
     "name": "David Kim",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/David Kim.jpg",
     "currentRole": "Investment Analyst",
     "company": "Goldman Sachs",
     "domain": "Finance",
@@ -110,7 +110,7 @@
   {
     "id": "story_005",
     "name": "Dr. Aisha Patel",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/Aisha Patel.jpg",
     "currentRole": "Clinical Psychologist",
     "company": "Private Practice",
     "domain": "Healthcare",
@@ -137,7 +137,7 @@
   {
     "id": "story_006",
     "name": "James Thompson",
-    "photo": "/placeholder.svg?height=150&width=150",
+  "photo": "/images/stories/James Thompson.jpg",
     "currentRole": "Mechanical Engineer",
     "company": "Tesla",
     "domain": "Engineering",
